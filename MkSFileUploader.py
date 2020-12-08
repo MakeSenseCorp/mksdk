@@ -4,7 +4,7 @@ import sys
 import signal
 import json
 import time
-import thread
+import _thread
 import threading
 
 class FileUpload():
@@ -110,7 +110,7 @@ class Manager():
 	
 	def Run(self):
 		self.ExitFlag = True
-		thread.start_new_thread(self.Worker, ())
+		_thread.start_new_thread(self.Worker, ())
 	
 	def Stop(self):
 		self.ExitFlag = False

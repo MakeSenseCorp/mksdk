@@ -2,7 +2,7 @@
 import os
 import sys
 import json
-import thread
+import _thread
 
 from collections import OrderedDict
 from geventwebsocket import WebSocketServer, WebSocketApplication, Resource
@@ -71,7 +71,7 @@ class MkSLocalWebsocketServer():
 	
 	def RunServer(self):
 		if self.ServerRunning is False:
-			thread.start_new_thread(self.Worker, ())
+			_thread.start_new_thread(self.Worker, ())
 
 WSManager = MkSLocalWebsocketServer()
 

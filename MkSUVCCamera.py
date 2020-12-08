@@ -1,7 +1,7 @@
 import os
 import sys
 import time
-import thread
+import _thread
 import threading
 import v4l2
 import fcntl
@@ -123,7 +123,7 @@ class UVCCamera():
 		self.Buffer.index   	= 0
 		fcntl.ioctl(self.Device, v4l2.VIDIOC_QUERYBUF, self.Buffer)
 		self.Memory 			= mmap.mmap(self.Device, self.Buffer.length, mmap.MAP_SHARED, mmap.PROT_READ | mmap.PROT_WRITE, offset=self.Buffer.m.offset)
-		# Queue the buffer for capture
+		# queue the buffer for capture
 		fcntl.ioctl(self.Device, v4l2.VIDIOC_QBUF, self.Buffer)
 
 		# Start streaming
@@ -182,7 +182,7 @@ class UVCCamera():
 	def Start(self):
 		self.WorkingStatusLock.acquire()
 		if (self.IsCameraWorking is False):
-			thread.start_new_thread(self.CameraThread, ())
+			_thread.start_new_thread(self.CameraThread, ())
 		self.WorkingStatusLock.release()
 
 	def Stop(self):
@@ -257,7 +257,7 @@ class UVCCamera():
 							self.Memory.close()
 							# Clode FD for this camera
 							os.close(self.Device)
-							# Stop camera thread
+							# Stop camera _thread
 							self.Stop()
 							# Emit to user
 							if self.OnCameraFailCallback is not None:
@@ -271,4 +271,4 @@ class UVCCamera():
 			if self.OnCameraFailCallback is not None:
 				self.OnCameraFailCallback(self.UID)
 		
-		print ("({classname})# Exit camera thread {0}".format(self.UID, classname=self.ClassName))
+		print ("({classname})# Exit camera _thread {0}".format(self.UID, classname=self.ClassName))

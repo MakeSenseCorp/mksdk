@@ -1,7 +1,7 @@
 import os
 import sys
 import time
-import thread
+import _thread
 import threading
 import v4l2
 import fcntl
@@ -118,7 +118,7 @@ class UVCCamera():
 		self.Buffer.index   	= 0
 		fcntl.ioctl(self.Device, v4l2.VIDIOC_QUERYBUF, self.Buffer)
 		self.Memory 			= mmap.mmap(self.Device, self.Buffer.length, mmap.MAP_SHARED, mmap.PROT_READ | mmap.PROT_WRITE, offset=self.Buffer.m.offset)
-		# Queue the buffer for capture
+		# queue the buffer for capture
 		fcntl.ioctl(self.Device, v4l2.VIDIOC_QBUF, self.Buffer)
 
 		# Start streaming
@@ -202,7 +202,7 @@ class UVCCamera():
 	def StartCamera(self):
 		self.WorkingStatusLock.acquire()
 		if (self.IsCameraWorking is False):
-			thread.start_new_thread(self.CameraThread, ())
+			_thread.start_new_thread(self.CameraThread, ())
 		self.WorkingStatusLock.release()
 
 	def StopCamera(self):
@@ -219,7 +219,7 @@ class UVCCamera():
 		# TODO - Is video creation is on going?
 		# TODO - Each camera must have its own video folder.
 		# TODO - Enable/Disable camera - self.IsGetFrame(T/F)
-		# TODO - Stop recording will not kill this thread
+		# TODO - Stop recording will not kill this _thread
 
 		frame_cur 			 = None
 		frame_pre 			 = None

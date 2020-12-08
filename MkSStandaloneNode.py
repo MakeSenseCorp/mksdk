@@ -4,7 +4,7 @@ import sys
 import json
 import time
 if sys.version_info[0] < 3:
-	import thread
+	import _thread
 else:
 	import _thread
 import threading
@@ -14,7 +14,7 @@ from subprocess import call
 import urllib
 import logging
 
-import MkSGlobals
+from mksdk import MkSGlobals
 from mksdk import MkSFile
 from mksdk import MkSNetMachine
 from mksdk import MkSAbstractNode

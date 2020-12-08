@@ -2,7 +2,7 @@
 import os
 import sys
 import json
-import thread
+import _thread
 import socket, select
 import time
 
@@ -96,13 +96,13 @@ class MkSStream():
 	
 	def Listen(self):
 		if self.IsServer is True:
-			thread.start_new_thread(self.Worker, ())
+			_thread.start_new_thread(self.Worker, ())
 			self.SetState("LISTEN")
 
 	def Connect(self):
 		if self.IsServer is False:
 			self.ClientSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-			thread.start_new_thread(self.Worker, ())
+			_thread.start_new_thread(self.Worker, ())
 			self.SetState("CONNECT")
 
 	def Disconnect(self):

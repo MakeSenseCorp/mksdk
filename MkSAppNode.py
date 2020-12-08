@@ -4,7 +4,7 @@ import sys
 import json
 import time
 if sys.version_info[0] < 3:
-	import thread
+	import _thread
 else:
 	import _thread
 import threading
@@ -90,7 +90,7 @@ class ApplicationNode(MkSAbstractNode.AbstractNode):
 			ret = self.SearchForMasters()
 			if ret > 0:
 				self.ChangeState("WORKING")
-				thread.start_new_thread(self.MasterNodeLocator, ())
+				_thread.start_new_thread(self.MasterNodeLocator, ())
 			else:
 				self.ChangeState("SEARCH_MASTERS")
 				self.SearchDontClean = False

@@ -19,15 +19,15 @@ import json
 import time
 import threading
 import socket
-import Queue
+import queue
 #from flask import Flask, render_template, jsonify, Response, request
 
 if sys.version_info[0] < 3:
-	import thread
+	import _thread
 else:
 	import _thread
 
-import MkSGlobals
+from mksdk import MkSGlobals
 from mksdk import MkSFile
 from mksdk import MkSNetMachine
 from mksdk import MkSAbstractNode

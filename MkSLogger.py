@@ -7,7 +7,7 @@ import datetime
 from datetime import date
 
 if sys.version_info[0] < 3:
-	import thread
+	import _thread
 else:
 	import _thread
 import threading
@@ -25,7 +25,7 @@ class Logger():
         self.Print              = False
         self.LoggerType         = "MKS"
         self.Path               = ""
-        self.Queue              = MkSQueue.Manager(self.Callback)
+        self.queue              = MkSQueue.Manager(self.Callback)
         self.LogType            = 5
         self.LogTypeMap         = {
             "1": "DEBUG",
@@ -37,7 +37,7 @@ class Logger():
             "7": "NONE"
         }
 
-        self.Queue.Start()
+        self.queue.Start()
     
     def Callback(self, item):
         try:
@@ -87,7 +87,7 @@ class Logger():
     def Log(self, message, level):
         self.Locker.acquire()
         try:
-            self.Queue.QueueItem({
+            self.queue.QueueItem({
                 "thread_id": 1,
                 "level": level,
                 "message": message

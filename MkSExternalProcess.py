@@ -3,7 +3,7 @@ import os
 import sys
 import json
 if sys.version_info[0] < 3:
-	import thread
+	import _thread
 else:
 	import _thread
 import threading
@@ -115,7 +115,7 @@ class ExternalProcess():
 		DEVNULL = open(os.devnull, 'w')
 		proc = subprocess.Popen(process, shell=True, stdout=DEVNULL, stderr=DEVNULL, cwd=working_dir)
 		# self.Pipe = LocalPipe(proc)
-		# thread.start_new_thread(self.Worker, ())
+		# _thread.start_new_thread(self.Worker, ())
 	
 	def KillProcess(self):
 		self.ExitEvent = False

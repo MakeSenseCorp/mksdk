@@ -1,11 +1,11 @@
 import os
 import sys
 import time
-import thread
+import _thread
 import threading
 import subprocess
 import gc
-import Queue
+import queue
 from subprocess import call
 from subprocess import Popen, PIPE
 from PIL import Image
@@ -23,10 +23,10 @@ class VideoCreator():
 	def __init__(self):
 		self.ClassName 	= "VideoCreator"
 		self.ObjName 	= "VideoCreator"
-		self.Orders 	= Queue.Queue()
+		self.Orders 	= queue.queue()
 		self.IsRunning	= True
 		self.FPS		= 8
-		thread.start_new_thread(self.OrdersManagerThread, ())
+		_thread.start_new_thread(self.OrdersManagerThread, ())
 	
 	def SetFPS(self, fps):
 		self.FPS = fps

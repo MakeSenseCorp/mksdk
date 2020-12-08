@@ -8,7 +8,7 @@ import time
 import json
 
 if sys.version_info[0] < 3:
-	import thread
+	import _thread
 else:
 	import _thread
 
@@ -272,8 +272,8 @@ class Network ():
 											'key':key
 											}
 		self.Disconnect()
-		print("# TODO - This thread will be created each time when connection lost or on retry!!!")
-		thread.start_new_thread(self.NodeWebfaceSocket_Thread, ())
+		print("# TODO - This _thread will be created each time when connection lost or on retry!!!")
+		_thread.start_new_thread(self.NodeWebfaceSocket_Thread, ())
 
 		return True
 

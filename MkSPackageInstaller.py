@@ -4,7 +4,7 @@ import sys
 import signal
 import json
 import time
-import thread
+import _thread
 import threading
 import re
 import zipfile
@@ -15,7 +15,7 @@ class Manager():
 	def __init__(self, node_context):
 		self.ClassName 		= "Package Installer"
 		self.Ctx 			= node_context
-		self.Queue    		= MkSQueue.Manager(self.Callback)
+		self.queue    		= MkSQueue.Manager(self.Callback)
 		self.HandlerMethod	= {
 			"install_zip": 	    self.InstallZIP_HandlerMethod,
 			"install_git":	    self.InstallGIT_HandlerMethod,
@@ -203,11 +203,11 @@ class Manager():
 		self.HandlerMethod[item["method"]](item["data"])
 	
 	def Run(self):
-		self.Queue.Start()
+		self.queue.Start()
 	
 	def Stop(self):
-		self.Queue.Stop()
+		self.queue.Stop()
 	
 	def AddWorkItem(self, item):
-		if self.Queue is not None:
-			self.Queue.QueueItem(item)
+		if self.queue is not None:
+			self.queue.QueueItem(item)

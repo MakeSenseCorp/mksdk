@@ -3,7 +3,7 @@ import os
 import sys
 import json
 if sys.version_info[0] < 3:
-	import thread
+	import _thread
 else:
 	import _thread
 import threading
@@ -11,12 +11,12 @@ import time
 import socket, select
 import argparse
 import logging
-import Queue
+import queue
 import hashlib
 import xml.etree.ElementTree as ET
 import random
 
-import MkSGlobals
+from mksdk import MkSGlobals
 from mksdk import MkSFile
 from mksdk import MkSUtils
 from mksdk import MkSBasicNetworkProtocol
@@ -104,7 +104,7 @@ class MkSLocalWebsocketServer():
 	
 	def RunServer(self):
 		if self.ServerRunning is False:
-			thread.start_new_thread(self.Worker, ())
+			_thread.start_new_thread(self.Worker, ())
 
 WSManager = MkSLocalWebsocketServer()
 
@@ -1422,7 +1422,7 @@ class AbstractNode():
 		self.LogMSG("({classname})# System configuration loaded".format(classname=self.ClassName),5)
 		self.SetState("INIT")
 
-		# Start local node dervice thread
+		# Start local node dervice _thread
 		self.ExitLocalServerEvent.clear()
 		if self.IsNodeLocalServerEnabled is True:
 			self.SocketServer.Logger = self.Logger
@@ -1436,7 +1436,7 @@ class AbstractNode():
 
 			# User callback
 			if ("WORKING" == self.GetState() and self.SystemLoaded is True):
-				self.ServicesManager() # TODO - Must be in differebt thread
+				self.ServicesManager() # TODO - Must be in differebt _thread
 				self.WorkingCallback()
 
 			self.Ticker += 1

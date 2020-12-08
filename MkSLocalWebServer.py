@@ -3,7 +3,7 @@ import os
 import sys
 import json
 if sys.version_info[0] < 3:
-	import thread
+	import _thread
 else:
 	import _thread
 import threading
@@ -41,7 +41,7 @@ class WebInterface():
 		self.App.run(host='0.0.0.0', port=self.Port)
 
 	def Run(self):
-		thread.start_new_thread(self.WebInterfaceWorker_Thread, ())
+		_thread.start_new_thread(self.WebInterfaceWorker_Thread, ())
 
 	def AddEndpoint(self, endpoint=None, endpoint_name=None, handler=None, args=None, method=['GET']):
 		if handler is None:

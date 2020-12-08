@@ -3,10 +3,10 @@ import os
 import sys
 import json
 import threading
-import Queue
+import queue
 
 if sys.version_info[0] < 3:
-	import thread
+	import _thread
 else:
 	import _thread
 
@@ -15,12 +15,12 @@ class Manager():
         self.ClassName		    = "MkSQueue"
         self.WorkerStart        = False
         self.Locker			    = threading.Lock()
-        self.LocalQueue		    = Queue.Queue()
+        self.LocalQueue		    = queue.queue()
         self.HandlerCallback    = handler
 
     def Start(self):
         self.WorkerStart = True
-        thread.start_new_thread(self.Worker, ())
+        _thread.start_new_thread(self.Worker, ())
     
     def Stop(self):
         self.WorkerStart = False

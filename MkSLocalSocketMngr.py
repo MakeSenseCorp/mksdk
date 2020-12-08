@@ -6,11 +6,11 @@ import time
 import socket, select
 
 if sys.version_info[0] < 3:
-	import thread
+	import _thread
 else:
 	import _thread
 
-import MkSGlobals
+from mksdk import MkSGlobals
 from mksdk import MkSFile
 from mksdk import MkSUtils
 from mksdk import MkSBasicNetworkProtocol
@@ -512,13 +512,13 @@ class Manager():
 		self.ServerAdderss = ('', port)
 
 	''' 
-		Description: 	Start worker thread of server.
+		Description: 	Start worker _thread of server.
 		Return: 		None.
 	'''	
 	def Start(self):
 		if self.ServerStarted is False:
 			self.ServerStarted = True
-			thread.start_new_thread(self.LocalSocketWorker, ())
+			_thread.start_new_thread(self.LocalSocketWorker, ())
 
 	''' 
 		Description: 	Stop worker threa of server.

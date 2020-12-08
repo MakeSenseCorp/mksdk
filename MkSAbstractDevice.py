@@ -3,7 +3,7 @@ import os
 import sys
 import json
 if sys.version_info[0] < 3:
-	import thread
+	import _thread
 else:
 	import _thread
 import threading

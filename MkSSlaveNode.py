@@ -4,7 +4,7 @@ import sys
 import json
 import time
 if sys.version_info[0] < 3:
-	import thread
+	import _thread
 else:
 	import _thread
 import threading
@@ -13,7 +13,7 @@ import socket
 from flask import Flask, render_template, jsonify, Response, request
 import logging
 
-import MkSGlobals
+from mksdk import MkSGlobals
 from mksdk import MkSFile
 from mksdk import MkSAbstractNode
 from mksdk import MkSLogger

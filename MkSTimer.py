@@ -4,7 +4,7 @@ import sys
 import signal
 import json
 import time
-import thread
+import _thread
 import threading
 import calendar
 from datetime import datetime
@@ -45,7 +45,7 @@ class MkSTimer():
 
 	def Run(self):
 		self.IsThreadRunning = True
-		thread.start_new_thread(self.WorkerThread, ())
+		_thread.start_new_thread(self.WorkerThread, ())
 
 	def Stop(self):
 		self.IsThreadRunning = False

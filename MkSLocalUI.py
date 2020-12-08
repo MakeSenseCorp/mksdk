@@ -84,7 +84,7 @@ def PreUILoaderHandler(self):
 #		self.Logger.Log("({classname})# Executing UI preloader (Only valid for local UI aka Webface)".format(classname=self.ClassName))
 #		self.PreUILoaderHandler()
 
-# Run UI thread
+# Run UI _thread
 #if self.IsLocalUIEnabled is True:
 #	if self.UI is None:
 #		self.Logger.Log("({classname})# Local UI(Webface) is not set ... (NULL)".format(classname=self.ClassName))
@@ -107,8 +107,8 @@ if self.IsLocalUIEnabled is True:
     if (self.Type not in [1, 2]):
         if self.LocalWSManager is not None:
             if self.LocalWSManager.IsServerRunnig() is False and self.LocalMasterConnection is None:
-                self.Logger.Log("({classname})# Exiting main thread ... ({0}, {1}) ...".format(self.LocalWSManager.IsServerRunnig(), self.LocalMasterConnection.Socket, classname=self.ClassName))
-                self.Exit("Exiting main thread")
+                self.Logger.Log("({classname})# Exiting main _thread ... ({0}, {1}) ...".format(self.LocalWSManager.IsServerRunnig(), self.LocalMasterConnection.Socket, classname=self.ClassName))
+                self.Exit("Exiting main _thread")
 
 def State_StartListener(self):
     self.ServerAdderss = ('', self.SlaveListenerPort)

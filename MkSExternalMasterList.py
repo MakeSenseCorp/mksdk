@@ -11,7 +11,7 @@ import os
 import sys
 import json
 import time
-import thread
+import _thread
 import threading
 
 class ExternalMasterList:
@@ -133,7 +133,7 @@ class ExternalMasterList:
 
 	def Start(self):
 		self.Context.LogMSG("({classname})# Start".format(classname=self.ClassName),5)
-		thread.start_new_thread(self.Worker, ())
+		_thread.start_new_thread(self.Worker, ())
 
 	def Stop(self):
 		self.Context.LogMSG("({classname})# Stop".format(classname=self.ClassName),5)

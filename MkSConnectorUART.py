@@ -4,9 +4,9 @@ import sys
 import time
 import struct
 import json
-import Queue
+import queue
 if sys.version_info[0] < 3:
-	import thread
+	import _thread
 else:
 	import _thread
 import threading
@@ -29,9 +29,9 @@ class Connector (MkSAbstractConnector.AbstractConnector):
 		self.AdaptorAsyncDataEvent 			= None
 		# Data arrived queue
 		self.QueueLock      	    		= threading.Lock()
-		self.Packets      					= Queue.Queue()
+		self.Packets      					= queue.queue()
 
-		thread.start_new_thread(self.RecievePacketsWorker, ())
+		_thread.start_new_thread(self.RecievePacketsWorker, ())
 	
 	def RecievePacketsWorker (self):
 		self.RecievePacketsWorkerRunning = True

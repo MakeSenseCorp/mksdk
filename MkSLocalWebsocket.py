@@ -2,7 +2,7 @@
 import os
 import sys
 import json
-import thread
+import _thread
 import threading
 import time
 
@@ -27,7 +27,7 @@ class MkSLocalWebsocketServer():
 		server.serve_forever()
 	
 	def RunServer(self):
-		thread.start_new_thread(self.Worker, ())
+		_thread.start_new_thread(self.Worker, ())
 
 WSManager = MkSLocalWebsocketServer()
 WSManager.RunServer()

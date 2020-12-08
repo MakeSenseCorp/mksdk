@@ -5,7 +5,7 @@ import sys
 import serial
 import struct
 if sys.version_info[0] < 3:
-	import thread
+	import _thread
 else:
 	import _thread
 import threading
@@ -57,7 +57,7 @@ class Adaptor ():
 			self.RecievePacketsWorkerRunning 	= True
 			self.DeviceConnected 				= True
 			self.ExitRecievePacketsWorker		= False
-			thread.start_new_thread(self.RecievePacketsWorker, ())
+			_thread.start_new_thread(self.RecievePacketsWorker, ())
 			return True
 		
 		return False

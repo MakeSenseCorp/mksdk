@@ -3,7 +3,7 @@ import os
 import sys
 import time
 if sys.version_info[0] < 3:
-	import thread
+	import _thread
 else:
 	import _thread
 import threading
@@ -17,7 +17,7 @@ class ShellExecutor():
 
 	def Run(self):
 		self.IsRunning = True
-		thread.start_new_thread(self.Worker, ())
+		_thread.start_new_thread(self.Worker, ())
 
 	def Stop(self):
 		pass

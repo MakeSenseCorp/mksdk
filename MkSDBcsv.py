@@ -3,13 +3,13 @@ import os
 import sys
 import json
 if sys.version_info[0] < 3:
-	import thread
+	import _thread
 else:
 	import _thread
 import threading
 import time
 from datetime import datetime
-import Queue
+import queue
 
 from mksdk import MkSFile
 
@@ -19,7 +19,7 @@ class Database():
 		self.ThreadRunning 			= False
 		self.CurrentFolderPath      = ""
 		self.QueueLock      	    = threading.Lock()
-		self.Orders      			= Queue.Queue()
+		self.Orders      			= queue.queue()
 		# Events
 		
 		# Create file system for storing videos
@@ -62,7 +62,7 @@ class Database():
 	
 	def RunServer(self):
 		if self.ThreadRunning is False:
-			thread.start_new_thread(self.Worker, ())
+			_thread.start_new_thread(self.Worker, ())
 	
 	def WriteDB(self, key, values):
 		self.QueueLock.acquire()
