@@ -123,11 +123,9 @@ class Manager():
 			self.LogMSG("({classname})# [StartListener]".format(classname=self.ClassName),5)
 			self.ServerSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			self.ServerSocket.setblocking(0)
-
 			self.ServerSocket.bind(self.ServerAdderss)
 			# [socket, ip_address, port]
 			conn = self.AppendConnection(self.ServerSocket, self.LocalIP, self.ServerAdderss[1], "SERVER", "SERVER")
-
 			self.ServerSocket.listen(32)
 			self.LocalSocketWorkerRunning = True
 		except Exception as e:

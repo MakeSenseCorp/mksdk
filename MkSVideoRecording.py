@@ -23,7 +23,7 @@ class VideoCreator():
 	def __init__(self):
 		self.ClassName 	= "VideoCreator"
 		self.ObjName 	= "VideoCreator"
-		self.Orders 	= queue.queue()
+		self.Orders 	= queue.Queue()
 		self.IsRunning	= True
 		self.FPS		= 8
 		_thread.start_new_thread(self.OrdersManagerThread, ())

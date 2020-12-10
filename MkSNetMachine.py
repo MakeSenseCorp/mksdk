@@ -1,23 +1,92 @@
 #!/usr/bin/python
 import os
-import urllib2
+from urllib.request import urlopen
 import urllib
 import websocket
 import sys
 import time
 import json
-
-if sys.version_info[0] < 3:
-	import _thread
-else:
-	import _thread
+import _thread
 
 from mksdk import MkSBasicNetworkProtocol
 from mksdk import MkSTransceiver
 from mksdk import MkSLocalSocketUtils
 
+def gateway_on_message (ws, message):
+	GlobGateway.OnGatewayMessageEvent(message)
+
+def gateway_on_error (ws, error):
+	GlobGateway.OnGatewayErrorEvent(error)
+
+def gateway_on_close (ws):
+	GlobGateway.OnGatewayCloseEvent()
+		
+def gateway_on_open (ws):
+	GlobGateway.OnGatewayOpenEvent()
+
+def WebsocketWorker():
+	global GlobGateway
+	GlobGateway.WS = websocket.WebSocketApp(GlobGateway.URL,
+				on_message = gateway_on_message,
+				on_error = gateway_on_error,
+				on_close = gateway_on_close)
+	GlobGateway.WS.header = GlobGateway.Header
+	GlobGateway.WS.on_open = gateway_on_open
+	GlobGateway.WS.run_forever()
+
+class MkSWebsocket():
+	def __init__(self):
+		self.GatewayOpenCallback 	= None
+		self.GatewayMessageCallback = None
+		self.GatewayCloseCallback 	= None
+		self.GatewayErrorCallback 	= None
+		self.Header 				= None
+		self.URL 					= None
+		self.WS  					= None
+
+	def SetURL(self, url):
+		pass
+
+	def OnGatewayOpenEvent(self):
+		if self.GatewayOpenCallback is not None:
+			self.GatewayOpenCallback()
+
+	def OnGatewayMessageEvent(self, data):
+		if self.GatewayMessageCallback is not None:
+			self.GatewayMessageCallback(data)
+
+	def OnGatewayCloseEvent(self):
+		if self.GatewayCloseCallback is not None:
+			self.GatewayCloseCallback()
+
+	def OnGatewayErrorEvent(self, error):
+		if self.GatewayErrorCallback is not None:
+			self.GatewayErrorCallback(error)
+	
+	def SetURL(self, url):
+		self.URL = url
+	
+	def SetHeader(self, header):
+		self.Header = header
+	
+	def Start(self):
+		_thread.start_new_thread(WebsocketWorker, ())
+	
+	def Stop(self):
+		pass
+
+	def Send(self, data):
+		if self.WS is not None:
+			self.WS.send(data)
+		else:
+			print("ERROR - Send")
+
+websocket.enableTrace(True)
+GlobGateway = MkSWebsocket()
+
 class Network ():
 	def __init__(self, uri, wsuri):
+		global GlobGateway
 		self.Name 		  	= "Communication to Node.JS"
 		self.ClassName 		= "MkSNetwork"
 		self.BasicProtocol 	= None
@@ -31,12 +100,18 @@ class Network ():
 		self.Type 		  	= 0
 		self.State 			= "DISCONN"
 		self.Logger 		= None
+		self.Gateway 		= GlobGateway
 		self.Transceiver	= MkSTransceiver.Manager(self.WebSocketTXCallback, self.WebSocketRXCallback)
 
 		self.OnConnectionCallback 		= None
 		self.OnDataArrivedCallback 		= None
 		self.OnErrorCallback 			= None
 		self.OnConnectionClosedCallback = None
+
+		self.Gateway.GatewayMessageCallback = self.GateawayOnMessageEvent
+		self.Gateway.GatewayOpenCallback 	= self.GatewayOnOpenEvent
+		self.Gateway.GatewayCloseCallback 	= self.GateawayOnCloseEvent
+		self.Gateway.GatewayErrorCallback 	= self.GateawayOnErrorEvent
 
 		# RX
 		self.RXHandlerMethod            = {
@@ -45,7 +120,38 @@ class Network ():
 			"websock_disconnected":	    self.WebSockDisconnected_RXHandlerMethod,
 			"websock_error":		    self.WebSockError_RXHandlerMethod,
 		}
-
+	
+	def GateawayOnMessageEvent(self, message):
+		self.LogMSG("({classname})# GateawayOnMessageEvent".format(classname=self.ClassName),5)
+		data = json.loads(message)
+		self.Transceiver.Receive({
+			"type": "websock_data_arrived",
+			"data": data
+		})
+	
+	def GatewayOnOpenEvent(self):
+		self.LogMSG("({classname})# GatewayOnOpenEvent".format(classname=self.ClassName),5)
+		self.State = "CONN"
+		self.Transceiver.Receive({
+			"type": "websock_new_connection",
+			"data": {}
+		})
+	
+	def GateawayOnCloseEvent(self):
+		self.LogMSG("({classname})# GateawayOnCloseEvent".format(classname=self.ClassName),5)
+		self.State = "DISCONN"
+		self.Transceiver.Receive({
+			"type": "websock_disconnected",
+			"data": {}
+		})
+	
+	def GateawayOnErrorEvent(self, error):
+		self.LogMSG("({classname})# GateawayOnErrorEvent".format(classname=self.ClassName),5)
+		self.Transceiver.Receive({
+			"type": "websock_error",
+			"data": error
+		})
+	
 	''' 
 		Description: 	
 		Return: 		
@@ -102,7 +208,8 @@ class Network ():
 				drt 	= self.BasicProtocol.GetDirectionFromJson(pckt)
 				cmd 	= self.BasicProtocol.GetCommandFromJson(pckt)
 				self.LogMSG("({classname})# Node -> Gateway [{2}] {0} -> {1} ({3})".format(src,dst,drt,cmd,classname=self.ClassName),5)
-				self.WSConnection.send(packet)
+				self.Gateway.Send(packet)
+				#self.WSConnection.send(packet)
 			else:
 				self.LogMSG("({classname})# Sending packet to Gateway FAILED".format(classname=self.ClassName),3)
 		except Exception as e:
@@ -139,9 +246,9 @@ class Network ():
 	''' 
 	def GetRequest (self, url):
 		try:
-			req = urllib2.urlopen(url, timeout=1)
+			req = urlopen(url, timeout=1)
 			if req != None:
-				data = req.read()
+				data = req.read().decode('utf-8')
 			else:
 				return "failed"
 		except:
@@ -155,7 +262,7 @@ class Network ():
 	''' 		
 	def PostRequset (self, url, payload):
 		try:
-			data = urllib2.urlopen(url, payload).read()
+			data = urlopen(url, payload).read().decode('utf-8')
 		except:
 			return "failed"
 		
@@ -191,54 +298,14 @@ class Network ():
 		Description: 	
 		Return: 		
 	''' 
-	def WSConnection_OnMessage_Handler (self, ws, message):
-		data = json.loads(message)
-		self.Transceiver.Receive({
-			"type": "websock_data_arrived",
-			"data": data
-		})
-
-	''' 
-		Description: 	
-		Return: 		
-	''' 
-	def WSConnection_OnError_Handler (self, ws, error):
-		self.Transceiver.Receive({
-			"type": "websock_error",
-			"data": error
-		})
-
-	''' 
-		Description: 	
-		Return: 		
-	''' 
-	def WSConnection_OnClose_Handler (self, ws):
-		self.State = "DISCONN"
-		self.Transceiver.Receive({
-			"type": "websock_disconnected",
-			"data": {}
-		})
-
-	''' 
-		Description: 	
-		Return: 		
-	''' 		
-	def WSConnection_OnOpen_Handler (self, ws):
-		self.State = "CONN"
-		self.Transceiver.Receive({
-			"type": "websock_new_connection",
-			"data": {}
-		})
-
-	''' 
-		Description: 	
-		Return: 		
-	''' 
 	def NodeWebfaceSocket_Thread (self):
-		self.LogMSG("({classname})# Connect Gateway ({url})...".format(url=self.WSServerUri,classname=self.ClassName),5)
-		self.WSConnection.keep_running = True
-		self.WSConnection.run_forever()
-		self.LogMSG("({classname})# Gateway Disconnected ({url})...".format(url=self.WSServerUri,classname=self.ClassName),5)
+		try:
+			self.LogMSG("({classname})# Connect Gateway ({url})...".format(url=self.WSServerUri,classname=self.ClassName),5)
+			self.WSConnection.keep_running = True
+			self.WSConnection.run_forever()
+			self.LogMSG("({classname})# Gateway Disconnected ({url})...".format(url=self.WSServerUri,classname=self.ClassName),5)
+		except Exception as e:
+			self.LogMSG("({classname})# NodeWebfaceSocket_Thread (ERROR) ({0})...".format(e,classname=self.ClassName),5)
 
 	''' 
 		Description: 	
@@ -246,7 +313,8 @@ class Network ():
 	''' 
 	def Disconnect(self):
 		self.LogMSG("({classname})# Close WebSocket Connection ...".format(classname=self.ClassName),5)
-		self.WSConnection.keep_running = False
+		#self.WSConnection.keep_running = False
+		self.Gateway.Stop()
 		time.sleep(1)
 
 	''' 
@@ -259,11 +327,23 @@ class Network ():
 		self.UserDevKey 				= key
 		self.BasicProtocol 				= MkSBasicNetworkProtocol.BasicNetworkProtocol(self.DeviceUUID)
 		self.BasicProtocol.SetKey(key)
+
+		self.Gateway.SetURL(self.WSServerUri)
+		self.Gateway.SetHeader({
+			'uuid':self.DeviceUUID, 
+			'node_type':str(self.Type), 
+			'payload':str(payload), 
+			'key':key
+		})
+		self.Gateway.Stop()
+		self.Gateway.Start()
+
+		'''
 		websocket.enableTrace(False)
-		self.WSConnection 				= websocket.WebSocketApp(self.WSServerUri)
-		self.WSConnection.on_message 	= self.WSConnection_OnMessage_Handler
-		self.WSConnection.on_error 		= self.WSConnection_OnError_Handler
-		self.WSConnection.on_close 		= self.WSConnection_OnClose_Handler
+		self.WSConnection 				= websocket.WebSocketApp(self.WSServerUri,
+																on_message = self.WSConnection_OnMessage_Handler,
+																on_error = self.WSConnection_OnError_Handler,
+																on_close = self.WSConnection_OnClose_Handler)
 		self.WSConnection.on_open 		= self.WSConnection_OnOpen_Handler
 		self.WSConnection.header		= 	{
 											'uuid':self.DeviceUUID, 
@@ -271,9 +351,11 @@ class Network ():
 											'payload':str(payload), 
 											'key':key
 											}
-		self.Disconnect()
-		print("# TODO - This _thread will be created each time when connection lost or on retry!!!")
+		print(self.WSConnection.header)
+		#self.Disconnect()
+		# print("# TODO - This _thread will be created each time when connection lost or on retry!!!")
 		_thread.start_new_thread(self.NodeWebfaceSocket_Thread, ())
+		'''
 
 		return True
 

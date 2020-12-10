@@ -38,6 +38,14 @@ class File ():
 			return data
 		return ""
 	
+	def LoadBytes(self, filename):
+		if os.path.isfile(filename) is True:
+			file = open(filename, "rb")
+			data = file.read()
+			file.close()
+			return data
+		return None
+	
 	def SaveJSON(self, filename, data):
 		db_file = open(filename, "w")
 		json.dump(data, db_file, indent=2)

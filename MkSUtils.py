@@ -3,7 +3,7 @@ import os
 import sys
 import subprocess
 import re
-import array
+from array import array
 
 class Utils():
 	def __init__(self):
@@ -11,7 +11,7 @@ class Utils():
 	
 	def GetSystemIPs(self):
 		proc = subprocess.Popen("ip a", shell=True, stdout=subprocess.PIPE)
-		data = proc.stdout.read()
+		data = proc.stdout.read().decode('utf-8')
 		data = re.sub(' +', ' ', data)
 		cmdRows = data.split("\n")
 		
@@ -53,16 +53,16 @@ def format_ip(addr):
 		str(ord(addr[3]))
 
 def all_interfaces():
-	max_possible = 128  # arbitrary. raise if needed.
-	bytes = max_possible * 32
+	names = array('b')
+	bytes_c = 128 * 32
+	names.frombytes(('\0' * bytes_c).encode())
 	s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-	names = array.array('B', '\0' * bytes)
 	outbytes = struct.unpack('iL', fcntl.ioctl(
 		s.fileno(),
 		0x8912,  # SIOCGIFCONF
-		struct.pack('iL', bytes, names.buffer_info()[0])
+		struct.pack('iL', bytes_c, names.buffer_info()[0])
 	))[0]
-	namestr = names.tostring()
+	namestr = names.tobytes().decode()
 	interfaces = [
 		"eth0",
 		"eth1",

@@ -15,7 +15,7 @@ class Manager():
         self.ClassName		    = "MkSQueue"
         self.WorkerStart        = False
         self.Locker			    = threading.Lock()
-        self.LocalQueue		    = queue.queue()
+        self.LocalQueue		    = queue.Queue()
         self.HandlerCallback    = handler
 
     def Start(self):

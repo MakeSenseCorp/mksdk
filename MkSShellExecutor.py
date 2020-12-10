@@ -42,7 +42,7 @@ class ShellExecutor():
 		data = None
 		try:
 			proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
-			data = proc.stdout.read()
+			data = proc.stdout.read().decode('utf-8')
 		except Exception as e:
 			print("ExecuteCommand Exception", e)
 		return data

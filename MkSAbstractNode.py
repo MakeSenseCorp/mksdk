@@ -15,6 +15,7 @@ import queue
 import hashlib
 import xml.etree.ElementTree as ET
 import random
+import base64
 
 from mksdk import MkSGlobals
 from mksdk import MkSFile
@@ -50,7 +51,7 @@ class MkSLocalWebsocketServer():
 		self.Port = port
 	
 	def AppendSocket(self, ws_id, ws):
-		print ("({classname})# [LOCAL WS] Append ({0})".format(ws_id, classname=self.ClassName))
+		print ("({classname})# [LOCAL WS] Append ({0}) {1}".format(ws_id, type(ws_id), classname=self.ClassName))
 		self.ApplicationSockets[ws_id] = ws
 		if self.OnWSConnected is not None:
 			self.OnWSConnected(ws_id)
@@ -80,13 +81,16 @@ class MkSLocalWebsocketServer():
 	
 	def Send(self, ws_id, data):
 		if ws_id in self.ApplicationSockets:
-			self.ApplicationSockets[ws_id].send(data)
+			try:
+				self.ApplicationSockets[ws_id].send(json.dumps(data))
+			except Exception as e:
+				print ("({classname})# [ERROR] Send {0}".format(str(e), classname=self.ClassName))
 		else:
 			print ("({classname})# ERROR - This socket ({0}) does not exist. (Might be closed)".format(ws_id, classname=self.ClassName))
 	
 	def EmitEvent(self, data):
 		for key in self.ApplicationSockets:
-			self.ApplicationSockets[key].send(data)
+			self.ApplicationSockets[key].send(json.dumps(data))
 	
 	def IsServerRunnig(self):
 		return self.ServerRunning
@@ -494,12 +498,16 @@ class AbstractNode():
 					if self.OnApplicationRequestCallback is not None:
 						try:
 							message = self.OnApplicationRequestCallback(None, packet)
+							#self.LogMSG("({classname})# [LocalWebsockDataArrivedHandler] {0}".format(message,classname=self.ClassName),5)
 							if message == "" or message is None:
 								return
 							
-							WSManager.Send(id(ws),message)
+							try:
+								WSManager.Send(id(ws),message)
+							except Exception as e:
+								self.LogException("[WSManager]",e,3)
 						except Exception as e:
-							self.LogException("[DataSocketInputHandler #2]",e,3)
+							self.LogException("[LocalWebsockDataArrivedHandler]",e,3)
 			else:
 				self.LogMSG("({classname})# [Websocket INBOUND] ERROR - Not support {0} request type.".format(messageType, classname=self.ClassName),4)
 		else:
@@ -1044,7 +1052,9 @@ class AbstractNode():
 	def RegisterItem(self, payload):
 		self.DeviceChangeListLock.acquire()
 		try:
-			key = hashlib.md5("{0}".format(json.dumps(payload))).hexdigest()
+			md5Obj = hashlib.md5("{0}".format(json.dumps(payload)).encode())
+			key = md5Obj.hexdigest()
+			#key = hashlib.md5("{0}".format(json.dumps(payload))).encode().hexdigest()
 			# Chek if this devicealready registered
 			for item in self.OnDeviceChangeList:
 				if key == item["key"]:
@@ -1070,7 +1080,9 @@ class AbstractNode():
 	def UnregisterItem(self, payload):
 		self.DeviceChangeListLock.acquire()
 		try:
-			key = hashlib.md5("{0}".format(json.dumps(payload))).hexdigest()
+			# key = hashlib.md5("{0}".format(json.dumps(payload))).encode().hexdigest()
+			md5Obj = hashlib.md5("{0}".format(json.dumps(payload)).encode())
+			key = md5Obj.hexdigest()
 			# Chek if this devicealready registered
 			for item in self.OnDeviceChangeList:
 				self.LogMSG("({classname})# [UnregisterItem] [{0} {1}] ? [{2} {3}]".format(key,payload,item["key"],item["payload"],classname=self.ClassName),5)
@@ -1158,16 +1170,17 @@ class AbstractNode():
 		ui_type = payload["ui_type"]
 		path 	= os.path.join(".","ui",machine_type,self.UITypes[ui_type],src)
 		self.LogMSG("({classname})# [GetResourceRequestHandler] {0}".format(path, classname=self.ClassName),6)
-		content = objFile.Load(path)
-
+		byte_content = objFile.LoadBytes(path)
+		content = ""
 		if tag == "img":
-			content = "data:image/jpeg;base64," + content.encode('base64')
-
+			#content = "data:image/jpeg;base64," + byte_content.encode('base64')
+			content = "data:image/jpeg;base64," + base64.b64encode(byte_content).decode('utf-8')
+		# 'content': content.encode('hex')
 		return {
 			'id': tag_id,
 			'tag': tag,
 			'src': src,
-			'content': content.encode('hex')
+			'content': content.encode("utf-8").hex()
 		}
 
 	''' 
@@ -1198,7 +1211,7 @@ class AbstractNode():
 			html_rows = content.split("\n")
 			for row in html_rows:
 				if 'data-obj="mks"' in row:
-					xml = "<root>{0}</root>\n".format(row[:-1])
+					xml = "<root>{0}</root>\n".format(row[:])
 					DOM = ET.fromstring(xml)
 					for element in DOM.iter():
 						if element.get('data-obj') is not None:
@@ -1265,10 +1278,11 @@ class AbstractNode():
 				fileType=fileType,
 				length=str(len(content))),5)
 		
+		# 'content': content.encode('hex')
 		return {
 			'file_type': fileType,
 			'ui_type': uiType,
-			'content': content.encode('hex')
+			'content': content.encode("utf-8").hex()
 		}
 
 	''' 

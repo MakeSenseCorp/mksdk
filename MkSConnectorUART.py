@@ -29,7 +29,7 @@ class Connector (MkSAbstractConnector.AbstractConnector):
 		self.AdaptorAsyncDataEvent 			= None
 		# Data arrived queue
 		self.QueueLock      	    		= threading.Lock()
-		self.Packets      					= queue.queue()
+		self.Packets      					= queue.Queue()
 
 		_thread.start_new_thread(self.RecievePacketsWorker, ())
 	

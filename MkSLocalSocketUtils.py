@@ -34,5 +34,6 @@ class SocketConnection():
 	
 	def GetHash(self):
 		if self.HASH == "":
-			self.HASH = hashlib.md5("{0}_{1}".format(self.IP,str(self.Port))).hexdigest()
+			md5Obj = hashlib.md5("{0}_{1}".format(self.IP,str(self.Port)).encode())
+			self.HASH = md5Obj.hexdigest()
 		return self.HASH

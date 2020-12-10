@@ -19,7 +19,7 @@ class Database():
 		self.ThreadRunning 			= False
 		self.CurrentFolderPath      = ""
 		self.QueueLock      	    = threading.Lock()
-		self.Orders      			= queue.queue()
+		self.Orders      			= queue.Queue()
 		# Events
 		
 		# Create file system for storing videos
