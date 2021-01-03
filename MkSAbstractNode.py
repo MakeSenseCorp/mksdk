@@ -244,7 +244,9 @@ class AbstractNode():
 		self.UI 									= None
 		self.LocalWebPort							= ""
 		self.BasicProtocol 							= None
-		print(self.NetworkCards)
+
+		for card in self.NetworkCards:
+			print(card)
 
 		''' Online Service
 			{
@@ -711,10 +713,10 @@ class AbstractNode():
 		connection.Obj["is_slave"]		= 0
 		connection.Obj["info"]			= None
 
-		if connection.Kind is "SERVER":
+		if connection.Kind == "SERVER":
 			connection.Obj["client_port"] 	= connection.Port
 			connection.Obj["server_port"] 	= connection.Socket.getsockname()[1]
-		elif connection.Kind is "CLIENT":
+		elif connection.Kind == "CLIENT":
 			connection.Obj["client_port"] 	= connection.Socket.getsockname()[1]
 			connection.Obj["server_port"] 	= connection.Port
 	
@@ -1290,6 +1292,7 @@ class AbstractNode():
 		Return: 		N/A
 	'''	
 	def LoadSystemConfig(self):
+		print(os.environ['HOME'])
 		self.MKSPath = os.path.join(os.environ['HOME'],"mks")
 		# Information about the node located here.
 		strSystemJson 		= self.File.Load("system.json") # Located in node context

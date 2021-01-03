@@ -4,95 +4,46 @@ import sys
 import subprocess
 import re
 from array import array
+import struct
+import netifaces
+
+class IPNetwork():
+	def __init__(self):
+		self.Interfaces = []
+		self.IPs 		= []
+		self.Gateway 	= []
+
+		self.Interfaces = netifaces.interfaces()
+		for network in self.Interfaces:
+			addrs = netifaces.ifaddresses(network)
+			if netifaces.AF_INET in addrs:
+				if len(addrs[netifaces.AF_INET]) > 0:
+					self.IPs.append({
+						"ip": addrs[netifaces.AF_INET][0],
+						"iface": network
+					})
+
+	def GetNetworkInterfaces(self):
+		return self.Interfaces
+	
+	def GetIPAdresses(self):
+		return self.IPs
 
 class Utils():
 	def __init__(self):
 		pass
-	
-	def GetSystemIPs(self):
-		proc = subprocess.Popen("ip a", shell=True, stdout=subprocess.PIPE)
-		data = proc.stdout.read().decode('utf-8')
-		data = re.sub(' +', ' ', data)
-		cmdRows = data.split("\n")
-		
-		items 	= []
-		ip 		= ""
-		mac 	= ""
-		subnet 	= ""
-		
-		for row in cmdRows[:-1]:
-			cols = row.split(" ")
-			if (cols[0] != ""):
-				# Start of new interface
-				if (cols[0] != "1:"):
-					# Not first interface
-					items.append([ip, mac])
-					ip = ""
-					mac = ""
-			if ("link/ether" in cols[1]):
-				mac = cols[2]
-			if ("inet" == cols[1]):
-				net = cols[2].split('/')
-				ip = net[0]
-				subnet = net[1]
-		items.append([ip, mac])	
-		return items
 
-if os.name != "nt":
-	import fcntl
-	import struct
-
-	def get_interface_ip(ifname):
-		s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-		return socket.inet_ntoa(fcntl.ioctl(s.fileno(), 0x8915, struct.pack('256s', ifname[:15]))[20:24])
-
-def format_ip(addr):
-	return str(ord(addr[0])) + '.' + \
-		str(ord(addr[1])) + '.' + \
-		str(ord(addr[2])) + '.' + \
-		str(ord(addr[3]))
-
-def all_interfaces():
-	names = array('b')
-	bytes_c = 128 * 32
-	names.frombytes(('\0' * bytes_c).encode())
-	s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-	outbytes = struct.unpack('iL', fcntl.ioctl(
-		s.fileno(),
-		0x8912,  # SIOCGIFCONF
-		struct.pack('iL', bytes_c, names.buffer_info()[0])
-	))[0]
-	namestr = names.tobytes().decode()
-	interfaces = [
-		"eth0",
-		"eth1",
-		"eth2",
-		"wlan0",
-		"wlan1",
-		"wifi0",
-		"ath0",
-		"ath1",
-		"ppp0",
-		"enp0s3",
-		"wlp2s0",
-		"lo"
-	]
-	lst = []
-	for face in interfaces:
-		if face in namestr:
-			idx = namestr.index(face)
-			name = namestr[idx:idx+16].split('\0', 1)[0]
-			ip   = namestr[idx+20:idx+24]
-			lst.append((name, ip))
-	return lst
-
+# LocalSocketMngr & AbstructNode
 def GetIPList():
 	ip_list = []
-	ifs = all_interfaces()
-	for i in ifs:
+
+	net = IPNetwork()
+	for ip in net.GetIPAdresses():
 		ip_list.append({
-			'iface':i[0],
-			'ip': format_ip(i[1])
+			'iface':ip["iface"],
+			'ip': ip["ip"]["addr"],
+			'mask': ip["ip"]["netmask"],
+			'mac': "00-00-00-00-00-00"
 		})
 	return ip_list
 
@@ -122,10 +73,11 @@ def GetLocalIP():
 	return ip
 
 def Ping(address):
-	response = subprocess.call("ping -c 1 %s" % address,
-			shell=True,
-			stdout=open('/dev/null', 'w'),
-			stderr=subprocess.STDOUT)
+	response = 1
+	if os.name != "nt":
+		response = subprocess.call("ping -c 1 %s" % address, shell=True, stdout=open('/dev/null', 'w'), stderr=subprocess.STDOUT)
+	else:
+		response = os.system('ping %s -n 1 > NUL' % (address,))
 	# Check response
 	if response == 0:
 		return True

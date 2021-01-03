@@ -201,7 +201,7 @@ class Network ():
 		try:
 			self.LogMSG("({classname})# [WebSocketTXCallback]".format(classname=self.ClassName),1)
 			packet = item["packet"]
-			if packet is not "" and packet is not None:
+			if packet != "" and packet is not None:
 				pckt 	= json.loads(packet)
 				src  	= self.BasicProtocol.GetSourceFromJson(pckt)
 				dst  	= self.BasicProtocol.GetDestinationFromJson(pckt)

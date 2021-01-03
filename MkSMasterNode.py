@@ -569,9 +569,9 @@ class MasterNode(MkSAbstractNode.AbstractNode):
 
 		src = self.BasicProtocol.GetSourceFromJson(packet)
 		if src not in ["WEBFACE"]:
-			if conn.Kind is "SERVER":
+			if conn.Kind == "SERVER":
 				payload["port"] = conn.Obj["server_port"]
-			elif conn.Kind is "CLIENT":
+			elif conn.Kind == "CLIENT":
 				payload["port"] = conn.Obj["client_port"]
 		
 		return payload
