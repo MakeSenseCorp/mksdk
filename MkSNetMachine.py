@@ -81,7 +81,7 @@ class MkSWebsocket():
 		else:
 			print("ERROR - Send")
 
-websocket.enableTrace(True)
+# websocket.enableTrace(True)
 GlobGateway = MkSWebsocket()
 
 class Network ():
