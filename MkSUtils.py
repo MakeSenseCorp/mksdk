@@ -77,7 +77,16 @@ def Ping(address):
 	if os.name != "nt":
 		response = subprocess.call("ping -c 1 %s" % address, shell=True, stdout=open('/dev/null', 'w'), stderr=subprocess.STDOUT)
 	else:
-		response = os.system('ping %s -n 1 > NUL' % (address,))
+		#response = subprocess.call("ping %s -n 1" % address, shell=True, stdout=subprocess.PIPE,stdin=subprocess.PIPE, stderr=subprocess.PIPE)
+		#response = os.system('ping %s -n 1 > NUL' % (address,))
+		ps  = subprocess.Popen('ping %s -n 1' % (address,),shell=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+		out = ps.communicate()
+		if len(out) > 0:
+			cmd_out = out[0].decode("utf-8") 
+			if "Request timed out." in cmd_out or "Destination host unreachable." in cmd_out:
+				response = 1
+			else:
+				response = 0
 	# Check response
 	if response == 0:
 		return True
