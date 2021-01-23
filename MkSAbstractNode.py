@@ -30,22 +30,22 @@ from geventwebsocket import WebSocketServer, WebSocketApplication, Resource
 
 class MkSLocalWebsocketServer():
 	def __init__(self):
-		self.ClassName 				= "MkSLocalWebsocketServer"
-		self.ApplicationSockets 	= {}
-		self.ServerRunning 			= False
+		self.ClassName				= "MkSLocalWebsocketServer"
+		self.ApplicationSockets		= {}
+		self.ServerRunning			= False
 		# Events
-		self.OnWSConnected 			= None
-		self.OnDataArrivedEvent 	= None
-		self.OnWSDisconnected 		= None
-		self.OnSessionsEmpty 		= None
-		self.Port 					= 0
+		self.OnWSConnected			= None
+		self.OnDataArrivedEvent		= None
+		self.OnWSDisconnected		= None
+		self.OnSessionsEmpty		= None
+		self.Port					= 0
 	
 	def RegisterCallbacks(self, connected, data, disconnect, empty):
 		print ("({classname})# [RegisterCallbacks]".format(classname=self.ClassName))
 		self.OnWSConnected		= connected
 		self.OnDataArrivedEvent = data
-		self.OnWSDisconnected 	= disconnect
-		self.OnSessionsEmpty 	= empty
+		self.OnWSDisconnected	= disconnect
+		self.OnSessionsEmpty	= empty
 
 	def SetPort(self, port):
 		self.Port = port
@@ -71,9 +71,9 @@ class MkSLocalWebsocketServer():
 		if ("HANDSHAKE" == packet['header']['message_type']):
 			return
 		
-		packet["additional"]["ws_id"] 	= id(ws)
-		packet["additional"]["pipe"]  	= "LOCAL_WS"
-		packet["stamping"] 				= ['local_ws']
+		packet["additional"]["ws_id"]	= id(ws)
+		packet["additional"]["pipe"]	= "LOCAL_WS"
+		packet["stamping"]				= ['local_ws']
 
 		# print ("({classname})# [WSDataArrived] {0} {1} {2}".format(id(ws),packet,self.OnDataArrivedEvent,classname=self.ClassName))
 		if self.OnDataArrivedEvent is not None:
@@ -135,83 +135,83 @@ class NodeWSApplication(WebSocketApplication):
 class AbstractNode():
 	def __init__(self):
 		self.ClassName								= ""
-		self.File 									= MkSFile.File()
+		self.File									= MkSFile.File()
 		self.SocketServer							= MkSLocalSocketMngr.Manager()
 		self.Network								= None
 		self.MKSPath								= ""
 		self.HostName								= socket.gethostname()
-		self.StreamSocksMngr 						= MkSStreamSocket.MkSStreamManager(self)
+		self.StreamSocksMngr						= MkSStreamSocket.MkSStreamManager(self)
 		# Device information
-		self.Type 									= 0
-		self.UUID 									= ""
-		self.OSType 								= ""
-		self.OSVersion 								= ""
-		self.BrandName 								= ""
+		self.Type									= 0
+		self.UUID									= ""
+		self.OSType									= ""
+		self.OSVersion								= ""
+		self.BrandName								= ""
 		self.Description							= ""
-		self.BoardType 								= ""
-		self.Name 									= "N/A"
+		self.BoardType								= ""
+		self.Name									= "N/A"
 		# Misc
-		self.IsMainNodeRunnig 						= True
-		self.AccessTick 							= 0 	# Network establishment counter
-		self.RegisteredNodes  						= []
+		self.IsMainNodeRunnig						= True
+		self.AccessTick								= 0		# Network establishment counter
+		self.RegisteredNodes						= []
 		self.System									= None
 		self.SystemLoaded							= False
-		self.IsHardwareBased 						= False
-		self.IsNodeWSServiceEnabled 				= False # Based on HTTP requests and web sockets
-		self.IsNodeLocalServerEnabled 				= False # Based on regular sockets
+		self.IsHardwareBased						= False
+		self.IsNodeWSServiceEnabled					= False # Based on HTTP requests and web sockets
+		self.IsNodeLocalServerEnabled				= False # Based on regular sockets
 		self.IsLocalUIEnabled						= False
-		self.Ticker 								= 0
+		self.Ticker									= 0
 		self.Pwd									= os.getcwd()
-		self.IsMaster 								= False
+		self.IsMaster								= False
 		self.IsLocalSockInUse						= False
 		# Queue
 		# State machine
-		self.State 									= 'IDLE' # Current state of node
-		self.States 								= None	 # States list
+		self.State									= 'IDLE' # Current state of node
+		self.States									= None	 # States list
 		# Locks and Events
 		self.ExitLocalServerEvent					= threading.Event()
 		# Debug
 		self.DebugMode								= False	
-		self.Logger 								= None
+		self.Logger									= None
 		# Callbacks
-		self.WorkingCallback 						= None
-		self.NodeSystemLoadedCallback 				= None
-		self.OnLocalServerStartedCallback 			= None # Main local server (listener) rutin started.
+		self.WorkingCallback						= None
+		self.NodeSystemLoadedCallback				= None
+		self.OnLocalServerStartedCallback			= None # Main local server (listener) rutin started.
 		self.OnAceptNewConnectionCallback			= None # Local server listener recieved new socket connection
 		self.OnMasterFoundCallback					= None # When master node found or connected this event will be raised.
 		self.OnMasterSearchCallback					= None # Raised on serach of master nodes start.
 		self.OnMasterDisconnectedCallback			= None # When slave node loose connection with master node.
-		self.OnTerminateConnectionCallback 			= None # When local server (listener) terminate socket connection.
+		self.OnTerminateConnectionCallback			= None # When local server (listener) terminate socket connection.
 		self.OnLocalServerListenerStartedCallback	= None # When loacl server (listener) succesfully binded port.
 		self.OnShutdownCallback						= None # When node recieve command to terminate itself.
-		self.OnGetNodesListCallback 				= None # Get all online nodes from GLOBAL gateway (Not implemented yet)
+		self.OnGetNodesListCallback					= None # Get all online nodes from GLOBAL gateway (Not implemented yet)
 		self.OnStreamSocketCreatedEvent				= None
 		self.OnStreamSocketDataEvent				= None
-		self.OnStreamSocketDisconnectedEvent 		= None
+		self.OnStreamSocketDisconnectedEvent		= None
 		self.OnGenericEventCallback					= None
 		self.OnNoneDirectionMessageArrivedCallback	= None
 		# Registered items
 		self.OnDeviceChangeList						= [] # Register command "register_on_node_change"
 		# Synchronization
-		self.DeviceChangeListLock 					= threading.Lock()
+		self.DeviceChangeListLock					= threading.Lock()
 		# Services
-		self.Services 								= {}
-		self.NetworkOnlineDevicesList 				= []
+		self.Services								= {}
+		self.NetworkOnlineDevicesList				= []
 		# Timers
 		self.ServiceSearchTS						= time.time()
 		## Unused
-		self.DeviceConnectedCallback 				= None
+		self.DeviceConnectedCallback				= None
 		# Initialization methods
-		self.MyPID 									= os.getpid()
-		self.MyLocalIP 								= "N/A"
-		self.NetworkCards 							= MkSUtils.GetIPList()
+		self.MyPID									= os.getpid()
+		self.MyLocalIP								= "N/A"
+		self.NetworkCards							= MkSUtils.GetIPList()
 		# Network
 		self.LocalMasterConnection					= None
 		# Handlers
 		self.NodeRequestHandlers					= {
-			'get_node_info': 						self.GetNodeInfoRequestHandler,
-			'get_node_status': 						self.GetNodeStatusRequestHandler,
-			'get_file': 							self.GetFileRequestHandler,
+			'get_node_info':						self.GetNodeInfoRequestHandler,
+			'get_node_status':						self.GetNodeStatusRequestHandler,
+			'get_file':								self.GetFileRequestHandler,
 			'get_resource':							self.GetResourceRequestHandler,
 			'register_on_node_change':				self.RegisterOnNodeChangeRequestHandler,
 			'unregister_on_node_change':			self.UnregisterOnNodeChangeRequestHandler,
@@ -223,9 +223,9 @@ class AbstractNode():
 			'operations':							self.OperationsRequestHandler,
 		}
 		self.NodeResponseHandlers					= {
-			'get_node_info': 						self.GetNodeInfoResponseHandler,
-			'get_node_status': 						self.GetNodeStatusResponseHandler,
-			'find_node': 							self.FindNodeResponseHandler,
+			'get_node_info':						self.GetNodeInfoResponseHandler,
+			'get_node_status':						self.GetNodeStatusResponseHandler,
+			'find_node':							self.FindNodeResponseHandler,
 			'master_append_node':					self.MasterAppendNodeResponseHandler,
 			'master_remove_node':					self.MasterRemoveNodeResponseHandler,
 			'get_online_devices':					self.GetOnlineDevicesResponseHandler,
@@ -234,16 +234,16 @@ class AbstractNode():
 			'open_stream_socket':					self.OpenStreamSocketResponseHandler,
 			'operations':							self.OperationsResponseHandler,
 		}
-		self.ApplicationRequestHandlers 			= None
-		self.ApplicationResponseHandlers 			= None
+		self.ApplicationRequestHandlers				= None
+		self.ApplicationResponseHandlers			= None
 		self.Operations								= {}
-		self.NodeFilterCommands 					= [
+		self.NodeFilterCommands						= [
 			'on_node_change'
 		]
 		# LocalFace UI
-		self.UI 									= None
+		self.UI										= None
 		self.LocalWebPort							= ""
-		self.BasicProtocol 							= None
+		self.BasicProtocol							= None
 
 		for card in self.NetworkCards:
 			print(card)
@@ -259,9 +259,9 @@ class AbstractNode():
 
 		# FS Area
 		self.UITypes = {
-			'config': 		'config',
-			'app': 			'app',
-			'thumbnail': 	'thumbnail'
+			'config':		'config',
+			'app':			'app',
+			'thumbnail':	'thumbnail'
 		}
 
 		parser = argparse.ArgumentParser(description='Execution module called Node')
@@ -277,8 +277,8 @@ class AbstractNode():
 		
 		self.SocketServer.NewSocketEvent			= self.SocketConnectHandler
 		self.SocketServer.CloseSocketEvent			= self.SocketDisconnectedHandler
-		self.SocketServer.NewConnectionEvent 		= self.NewNodeConnectedHandler
-		self.SocketServer.ConnectionRemovedEvent 	= self.NodeDisconnectedHandler
+		self.SocketServer.NewConnectionEvent		= self.NewNodeConnectedHandler
+		self.SocketServer.ConnectionRemovedEvent	= self.NodeDisconnectedHandler
 		self.SocketServer.DataArrivedEvent			= self.DataSocketInputHandler
 		self.SocketServer.ServerStartetedEvent		= self.LocalServerStartedHandler
 		
@@ -368,27 +368,27 @@ class AbstractNode():
 	
 	def OperationsRequestHandler(self, sock, packet):
 		messageType = self.BasicProtocol.GetMessageTypeFromJson(packet)
-		direction 	= self.BasicProtocol.GetDirectionFromJson(packet)
+		direction	= self.BasicProtocol.GetDirectionFromJson(packet)
 		destination = self.BasicProtocol.GetDestinationFromJson(packet)
-		source 		= self.BasicProtocol.GetSourceFromJson(packet)
-		command 	= self.BasicProtocol.GetCommandFromJson(packet)
-		payload 	= self.BasicProtocol.GetPayloadFromJson(packet)
+		source		= self.BasicProtocol.GetSourceFromJson(packet)
+		command		= self.BasicProtocol.GetCommandFromJson(packet)
+		payload		= self.BasicProtocol.GetPayloadFromJson(packet)
 
 		if "index" in payload and "subindex" in payload:
-			index 		= payload["index"]
-			subindex  	= payload["subindex"]
+			index		= payload["index"]
+			subindex	= payload["subindex"]
 			self.LogMSG("({classname})# [OperationsResponseHandler] {0} {1}".format(index,subindex,classname=self.ClassName),5)
 			if index in self.Operations:
 				data = self.Operations[index][subindex](sock, packet)
 				return {
-					"index": 	 index,
+					"index":	 index,
 					"subindex":	 subindex,
 					"direction": 0,
-					"data": 	 data
+					"data":		 data
 				}
 			
 			return {
-				"index": 	 index,
+				"index":	 index,
 				"subindex":	 subindex,
 				"direction": 0,
 				"data": {
@@ -402,15 +402,15 @@ class AbstractNode():
 
 	def OperationsResponseHandler(self, sock, packet):
 		messageType = self.BasicProtocol.GetMessageTypeFromJson(packet)
-		direction 	= self.BasicProtocol.GetDirectionFromJson(packet)
+		direction	= self.BasicProtocol.GetDirectionFromJson(packet)
 		destination = self.BasicProtocol.GetDestinationFromJson(packet)
-		source 		= self.BasicProtocol.GetSourceFromJson(packet)
-		command 	= self.BasicProtocol.GetCommandFromJson(packet)
-		payload 	= self.BasicProtocol.GetPayloadFromJson(packet)
+		source		= self.BasicProtocol.GetSourceFromJson(packet)
+		command		= self.BasicProtocol.GetCommandFromJson(packet)
+		payload		= self.BasicProtocol.GetPayloadFromJson(packet)
 
 		if "index" in payload and "subindex" in payload:
-			index 		= payload["index"]
-			subindex  	= payload["subindex"]
+			index		= payload["index"]
+			subindex	= payload["subindex"]
 			self.LogMSG("({classname})# [OperationsResponseHandler] {0} {1}".format(index,subindex,classname=self.ClassName),5)
 			if index in self.Operations:
 				self.Operations[index][subindex](sock, packet)
@@ -430,8 +430,8 @@ class AbstractNode():
 			self.ApplicationResponseHandlers[command](sock, packet)
 
 	''' 
-		Description: 	Handler [register_on_node_change] RESPONSE
-		Return: 		N/A
+		Description:	Handler [register_on_node_change] RESPONSE
+		Return:			N/A
 	'''		
 	def RegisterOnNodeChangeResponseHandler(self, sock, packet):
 		payload = self.BasicProtocol.GetPayloadFromJson(packet)
@@ -447,8 +447,8 @@ class AbstractNode():
 				self.OnGenericEventCallback("on_register_node_change", payload)
 
 	''' 
-		Description: 	Handler [unregister_on_node_change] RESPONSE
-		Return: 		N/A
+		Description:	Handler [unregister_on_node_change] RESPONSE
+		Return:			N/A
 	'''			
 	def UnregisterOnNodeChangeResponseHandler(self, sock, packet):
 		payload = self.BasicProtocol.GetPayloadFromJson(packet)
@@ -469,10 +469,10 @@ class AbstractNode():
 
 	def LocalWebsockDataArrivedHandler(self, ws, packet):
 		messageType = self.BasicProtocol.GetMessageTypeFromJson(packet)
-		direction 	= self.BasicProtocol.GetDirectionFromJson(packet)
+		direction	= self.BasicProtocol.GetDirectionFromJson(packet)
 		destination = self.BasicProtocol.GetDestinationFromJson(packet)
-		source 		= self.BasicProtocol.GetSourceFromJson(packet)
-		command 	= self.BasicProtocol.GetCommandFromJson(packet)
+		source		= self.BasicProtocol.GetSourceFromJson(packet)
+		command		= self.BasicProtocol.GetCommandFromJson(packet)
 
 		#packet["additional"]["client_type"] = "global_ws"
 		self.LogMSG("({classname})# LocalWebsock [{direction}] {source} -> {dest} [{cmd}]".format(
@@ -494,7 +494,10 @@ class AbstractNode():
 			elif messageType in ["DIRECT", "PRIVATE", "WEBFACE"]:
 				if command in self.NodeRequestHandlers.keys():
 					message = self.NodeRequestHandlers[command](None, packet)
-					WSManager.Send(id(ws),message)
+					if message == "" or message is None:
+						return
+					msg_response = self.BasicProtocol.BuildResponse(packet,message)
+					WSManager.Send(id(ws),packet)
 				else:
 					# This command belongs to the application level
 					if self.OnApplicationRequestCallback is not None:
@@ -505,7 +508,8 @@ class AbstractNode():
 								return
 							
 							try:
-								WSManager.Send(id(ws),message)
+								msg_response = self.BasicProtocol.BuildResponse(packet,message)
+								WSManager.Send(id(ws),packet)
 							except Exception as e:
 								self.LogException("[WSManager]",e,3)
 						except Exception as e:
@@ -533,7 +537,7 @@ class AbstractNode():
 	''' 
 		Description:	Connect node (MASTER) over socket, add connection to connections list
 						and add node to masters list.
-		Return: 		Status (True/False).
+		Return:			Status (True/False).
 	'''
 	def ConnectMaster(self, ip):
 		connection, status = self.SocketServer.Connect(ip, 16999, "SERVER")
@@ -550,7 +554,7 @@ class AbstractNode():
 
 	''' 
 		Description:	Connect node over socket, add connection to connections list.
-		Return: 		Connection and status
+		Return:			Connection and status
 	'''
 	def ConnectNode(self, ip, port):
 		# TODO - Make sure ip located in this network
@@ -558,7 +562,7 @@ class AbstractNode():
 
 	''' 
 		Description:	Search for MASTER nodes on local network.
-		Return: 		IP list of MASTER nodes.
+		Return:			IP list of MASTER nodes.
 	'''
 	def FindMasters(self):
 		# Let user know master search started.
@@ -573,21 +577,21 @@ class AbstractNode():
 	''' 
 		Description:	Connect node (MASTER) over socket, add connection to connections list
 						and add node to masters list.
-		Return: 		Status (True/False).
+		Return:			Status (True/False).
 	'''
 	def ConnectLocalMaster(self):
 		return self.ConnectMaster(self.MyLocalIP)
 
 	''' 
-		Description: 	Get local node.
-		Return: 		SocketConnection list.
+		Description:	Get local node.
+		Return:			SocketConnection list.
 	'''	
 	def GetConnectedNodes(self):
 		return self.SocketServer.GetConnections()
 
 	''' 
-		Description: 	Get local node by UUID.
-		Return: 		SocketConnection.
+		Description:	Get local node by UUID.
+		Return:			SocketConnection.
 	'''
 	def GetNodeByUUID(self, uuid):
 		connection_map = self.SocketServer.GetConnections()
@@ -598,38 +602,38 @@ class AbstractNode():
 		return None
 	
 	''' 
-		Description: 	Get local node by IP and Port.
-		Return: 		SocketConnection.
+		Description:	Get local node by IP and Port.
+		Return:			SocketConnection.
 	'''	
 	def GetNode(self, ip, port):
 		return self.SocketServer.GetConnection(ip, port)
 
 	''' 
-		Description: 	<N/A>
-		Return: 		<N/A>
+		Description:	<N/A>
+		Return:			<N/A>
 	'''
 	def SendBySocket(self, sock, command, payload):
 		conn = self.SocketServer.GetConnectionBySock(sock)
 		if conn is not None:
 			message = self.BasicProtocol.BuildRequest("DIRECT", conn.Obj["uuid"], self.UUID, command, payload, {})
-			packet  = self.BasicProtocol.AppendMagic(message)
+			packet	= self.BasicProtocol.AppendMagic(message)
 			self.SocketServer.Send(sock, packet)
 			return True
 		return False
 	
 	''' 
-		Description: 	<N/A>
-		Return: 		<N/A>
+		Description:	<N/A>
+		Return:			<N/A>
 	'''
 	def SendBroadcastBySocket(self, sock, command):
 		message = self.BasicProtocol.BuildRequest("BROADCAST", "BROADCAST", self.UUID, command, {}, {})
-		packet  = self.BasicProtocol.AppendMagic(message)
+		packet	= self.BasicProtocol.AppendMagic(message)
 		self.SocketServer.Send(sock, packet)
 		return True
 
 	''' 
-		Description: 	<N/A>
-		Return: 		<N/A>
+		Description:	<N/A>
+		Return:			<N/A>
 	'''	
 	def SendBroadcastByUUID(self, uuid, command):
 		conn = self.GetNodeByUUID(uuid)
@@ -646,26 +650,31 @@ class AbstractNode():
 		pass
 	
 	''' 
-		Description: 	Input handler binded to LocalSocketMngr callback.
-		Return: 		None.
+		Description:	Input handler binded to LocalSocketMngr callback.
+		Return:			None.
 	'''
-	def DataSocketInputHandler(self, connection, data):
+	def DataSocketInputHandler(self, connection, bytes):
 		try:
+			data = bytes.decode()
 			# Each makesense packet should start from magic number "MKS"
+			self.LogMSG("({classname})# [DataSocketInputHandler] DEBUG #1".format(classname=self.ClassName),5)
+			self.LogMSG("({classname})# [DataSocketInputHandler] {0}".format(data, classname=self.ClassName),5)
 			if "MKSS" in data[:4]:
 				# One packet can hold multiple MKS messages.
+				self.LogMSG("({classname})# [DataSocketInputHandler] DEBUG #2".format(classname=self.ClassName),5)
 				multiData = data.split("MKSS:")
 				for fragment in multiData[1:]:
+					self.LogMSG("({classname})# [DataSocketInputHandler] DEBUG #3".format(classname=self.ClassName),5)
 					if "MKSE" in fragment:
 						# Handling MKS packet
 						raw_data	= fragment[:-5]
-						sock 		= connection.Socket
-						packet 		= json.loads(raw_data)
+						sock		= connection.Socket
+						packet		= json.loads(raw_data)
 						messageType = self.BasicProtocol.GetMessageTypeFromJson(packet)
-						command 	= self.BasicProtocol.GetCommandFromJson(packet)
-						direction 	= self.BasicProtocol.GetDirectionFromJson(packet)
+						command		= self.BasicProtocol.GetCommandFromJson(packet)
+						direction	= self.BasicProtocol.GetDirectionFromJson(packet)
 						destination = self.BasicProtocol.GetDestinationFromJson(packet)
-						source 		= self.BasicProtocol.GetSourceFromJson(packet)
+						source		= self.BasicProtocol.GetSourceFromJson(packet)
 
 						packet["additional"]["client_type"] = "global_ws" # Why?
 						self.LogMSG("({classname})# SOCK [{type}] [{direction}] {source} -> {dest} [{cmd}]".format(classname=self.ClassName,
@@ -690,9 +699,9 @@ class AbstractNode():
 			self.LogException("[DataSocketInputHandler]",e,3)
 	
 	''' 
-		Description: 	This handler cslled after socket created and appended
+		Description:	This handler cslled after socket created and appended
 						to the connections list with HASH and etc...
-		Return: 		
+		Return:			
 	'''
 	def NewNodeConnectedHandler(self, connection):
 		# self.LogMSG("({classname})# [NewNodeConnectedHandler]".format(classname=self.ClassName), 4)
@@ -703,34 +712,36 @@ class AbstractNode():
 			self.SendBroadcastBySocket(connection.Socket, "get_node_info")
 		
 		# Initiate NODE information
-		connection.Obj["uuid"] 			= "N/A"
-		connection.Obj["type"] 			= 0
-		connection.Obj["local_type"] 	= "CLIENT"
+		connection.Obj["uuid"]			= "N/A"
+		connection.Obj["type"]			= 0
+		connection.Obj["local_type"]	= "CLIENT"
 		connection.Obj["listener_port"] = 0
-		connection.Obj["pid"] 			= 0
-		connection.Obj["name"] 			= "N/A"
-		connection.Obj["status"] 		= 1
+		connection.Obj["pid"]			= 0
+		connection.Obj["name"]			= "N/A"
+		connection.Obj["status"]		= 1
 		connection.Obj["is_slave"]		= 0
 		connection.Obj["info"]			= None
 
 		if connection.Kind == "SERVER":
-			connection.Obj["client_port"] 	= connection.Port
-			connection.Obj["server_port"] 	= connection.Socket.getsockname()[1]
+			connection.Obj["client_port"]	= connection.Port
+			connection.Obj["server_port"]	= connection.Socket.getsockname()[1]
 		elif connection.Kind == "CLIENT":
-			connection.Obj["client_port"] 	= connection.Socket.getsockname()[1]
-			connection.Obj["server_port"] 	= connection.Port
+			connection.Obj["client_port"]	= connection.Socket.getsockname()[1]
+			connection.Obj["server_port"]	= connection.Port
 	
 	''' 
-		Description: 	
-		Return: 		
+		Description:	
+		Return:			
 	'''
 	def NodeDisconnectedHandler(self, connection):
 		# Remove from registration list
 		# self.RemoveDeviceChangeListNode(connection.Obj["uuid"])
+		self.LogMSG("({classname})# [NodeDisconnectedHandler] DEBUG #1".format(classname=self.ClassName),5)
 		self.UnregisterItem({
 			'item_type': 1,
 			'uuid':	connection.Obj["uuid"]
 		})
+		self.LogMSG("({classname})# [NodeDisconnectedHandler] DEBUG #2".format(classname=self.ClassName),5)
 		# Raise event for user
 		try:
 			if self.OnTerminateConnectionCallback is not None:
@@ -739,33 +750,33 @@ class AbstractNode():
 			self.LogException("[NodeDisconnectedHandler]",e,3)
 		
 	''' 
-		Description: 	
-		Return: 		
+		Description:	
+		Return:			
 	'''	
 	def LocalServerStartedHandler(self, connection):
 		# Let know registered method about local server start.
 		if self.OnLocalServerListenerStartedCallback is not None:
 			self.OnLocalServerListenerStartedCallback(connection.Socket, connection.IP, connection.Port)
 		# Update node information
-		connection.Obj["uuid"] 			= self.UUID
-		connection.Obj["type"] 			= self.Type
-		connection.Obj["local_type"] 	= "LISTENER"
+		connection.Obj["uuid"]			= self.UUID
+		connection.Obj["type"]			= self.Type
+		connection.Obj["local_type"]	= "LISTENER"
 		connection.Obj["listener_port"] = 16999
 
-		connection.Obj["pid"] 			= 0
-		connection.Obj["name"] 			= "N/A"
-		connection.Obj["status"] 		= 1
+		connection.Obj["pid"]			= 0
+		connection.Obj["name"]			= "N/A"
+		connection.Obj["status"]		= 1
 
 	''' 
-		Description: 	Get devices in local network
-		Return: 		None
+		Description:	Get devices in local network
+		Return:			None
 	'''	
 	def ScanNetwork(self):
 		self.SendRequestToNode("MASTER", "get_online_devices", {})
 
 	''' 
-		Description: 	Get devices in local network handler. [RESPONSE]
-		Return: 		None
+		Description:	Get devices in local network handler. [RESPONSE]
+		Return:			None
 	'''		
 	def GetOnlineDevicesResponseHandler(self, sock, packet):
 		self.LogMSG("({classname})# [GetOnlineDevicesResponseHandler]".format(classname=self.ClassName),5)
@@ -773,8 +784,8 @@ class AbstractNode():
 		self.NetworkOnlineDevicesList = payload["online_devices"]
 
 	''' 
-		Description: 	Find nodes according to type and categories.
-		Return: 		None
+		Description:	Find nodes according to type and categories.
+		Return:			None
 	'''	
 	def FindNode(self, category1, category2, category3, node_type):
 		payload = {
@@ -787,7 +798,7 @@ class AbstractNode():
 	
 	def SearchNodes(self, index):
 		self.SendRequest("BROADCAST", "BROADCAST", "operations", {
-			"index": 	 index,
+			"index":	 index,
 			"subindex":	 0x0,
 			"direction": 0x1,
 			"data": { }
@@ -805,8 +816,8 @@ class AbstractNode():
 		self.SendRequest("MASTER", "DIRECT", "service", payload, {})
 
 	''' 
-		Description: 	Request to open private stream socket to other node [RESPONSE]
-		Return: 		None
+		Description:	Request to open private stream socket to other node [RESPONSE]
+		Return:			None
 	'''	
 	def OpenStreamSocketRequestHandler(self, sock, packet):
 		self.LogMSG("({classname})# [OpenStreamSocketRequestHandler]".format(classname=self.ClassName),5)
@@ -821,13 +832,13 @@ class AbstractNode():
 				'status': "NOTSUPPORTED"
 			}
 		identity = payload["ts"]
-		uuid 	 = payload["uuid"]
-		ip 	 	 = payload["ip"]
+		uuid	 = payload["uuid"]
+		ip		 = payload["ip"]
 
 		self.StreamSocksMngr.CreateStream(identity, "server_{0}".format(identity), True)
 		self.StreamSocksMngr.RegisterCallbacks(identity, self.OnStreamSocketCreatedEvent, self.OnStreamSocketDataEvent, self.OnStreamSocketDisconnectedEvent)
 		stream = self.StreamSocksMngr.GetStream(identity)
-		stream.UUID 	= uuid
+		stream.UUID		= uuid
 		stream.ClientIP = ip
 		self.StreamSocksMngr.UpdateStream(identity, stream)
 		stream.SetServerIP(self.MyLocalIP)
@@ -847,17 +858,17 @@ class AbstractNode():
 		return payload
 	
 	''' 
-		Description: 	Requestor for stream private socket get reaponse with status and port [RESPONSE]
-		Return: 		None
+		Description:	Requestor for stream private socket get reaponse with status and port [RESPONSE]
+		Return:			None
 	'''	
 	def OpenStreamSocketResponseHandler(self, sock, packet):
 		self.LogMSG("({classname})# [OpenStreamSocketResponseHandler]".format(classname=self.ClassName),5)
 		payload = self.BasicProtocol.GetPayloadFromJson(packet)
 
-		ip 			 = payload["ip"]
-		port 		 = payload["port"]
-		identity 	 = payload["ts"]
-		uuid 		 = payload["uuid"]
+		ip			 = payload["ip"]
+		port		 = payload["port"]
+		identity	 = payload["ts"]
+		uuid		 = payload["uuid"]
 
 		stream = self.GetStream(identity)
 		stream.SetPort(port)
@@ -870,7 +881,7 @@ class AbstractNode():
 
 	''' 
 		Description:	Connect node over socket (private stream use), add connection to connections list.
-		Return: 		Connection and status
+		Return:			Connection and status
 	'''
 	def ConnectStream(self, uuid, name):
 		# Generate timestamp
@@ -891,7 +902,7 @@ class AbstractNode():
 	
 	''' 
 		Description:	Send data over stream
-		Return: 		None
+		Return:			None
 	'''
 	def SendStream(self, identity, data):
 		stream = self.GetStream(identity)
@@ -903,37 +914,37 @@ class AbstractNode():
 		
 	''' 
 		Description:	Return created stream.
-		Return: 		Stream
+		Return:			Stream
 	'''
 	def GetStream(self, identity):
 		return self.StreamSocksMngr.GetStream(identity)
 	
 	''' 
 		Description:	Disconnect stream.
-		Return: 		None
+		Return:			None
 	'''
 	def DisconnectStream(self, identity):
 		pass
 
 	''' 
-		Description: 	Find nodes according to type and categories handler. [RESPONSE]
-		Return: 		None
+		Description:	Find nodes according to type and categories handler. [RESPONSE]
+		Return:			None
 	'''	
 	def FindNodeResponseHandler(self, sock, packet):
 		self.LogMSG("({classname})# [FindNodeResponseHandler]".format(classname=self.ClassName),5)
-		payload 	= self.BasicProtocol.GetPayloadFromJson(packet)
-		additional 	= self.BasicProtocol.GetAdditionalFromJson(packet)
+		payload		= self.BasicProtocol.GetPayloadFromJson(packet)
+		additional	= self.BasicProtocol.GetAdditionalFromJson(packet)
 
 		additional["online"] = True
 		packet = self.BasicProtocol.SetAdditional(packet, additional)
 
 		if payload["tagging"]["cat_1"] == "service":
-			self.Services[payload["type"]]["uuid"] 		= payload["uuid"]
-			self.Services[payload["type"]]["enabled"] 	= 1
+			self.Services[payload["type"]]["uuid"]		= payload["uuid"]
+			self.Services[payload["type"]]["enabled"]	= 1
 
 	''' 
-		Description: 	Find nodes according to type and categories handler. [REQUEST]
-		Return: 		None
+		Description:	Find nodes according to type and categories handler. [REQUEST]
+		Return:			None
 	'''	
 	def FindNodeRequestHandler(self, sock, packet):
 		self.LogMSG("({classname})# [FindNodeRequestHandler]".format(classname=self.ClassName),5)
@@ -952,30 +963,30 @@ class AbstractNode():
 			return ""
 	
 	''' 
-		Description: 	This is basicaly event for slave node - When master append a new node 
+		Description:	This is basicaly event for slave node - When master append a new node 
 						connection after providing port to new conneceted node. [RESPONSE]
-		Return: 		None
+		Return:			None
 	'''	
 	def MasterAppendNodeResponseHandler(self, sock, packet):
 		self.LogMSG("({classname})# [MasterAppendNodeResponseHandler]".format(classname=self.ClassName),5)
-		payload 	= self.BasicProtocol.GetPayloadFromJson(packet)
-		additional 	= self.BasicProtocol.GetAdditionalFromJson(packet)
+		payload		= self.BasicProtocol.GetPayloadFromJson(packet)
+		additional	= self.BasicProtocol.GetAdditionalFromJson(packet)
 
 		additional["online"] = True
 		packet = self.BasicProtocol.SetAdditional(packet, additional)
 
 		if payload["tagging"]["cat_1"] == "service":
-			self.Services[payload["type"]]["uuid"] 		= payload["uuid"]
-			self.Services[payload["type"]]["enabled"] 	= 1
+			self.Services[payload["type"]]["uuid"]		= payload["uuid"]
+			self.Services[payload["type"]]["enabled"]	= 1
 
 	''' 
-		Description: 	This is basicaly event for slave node - When master remove a node
+		Description:	This is basicaly event for slave node - When master remove a node
 						connection after upon its disconnection. [RESPONSE]
-		Return: 		None
+		Return:			None
 	'''	
 	def MasterRemoveNodeResponseHandler(self, sock, packet):
 		self.LogMSG("({classname})# [MasterRemoveNodeResponseHandler]".format(classname=self.ClassName),1)
-		payload 	= self.BasicProtocol.GetPayloadFromJson(packet)
+		payload		= self.BasicProtocol.GetPayloadFromJson(packet)
 		additional = self.BasicProtocol.GetAdditionalFromJson(packet)
 		self.LogMSG("({classname})# [MasterRemoveNodeResponseHandler] {0}".format(payload,classname=self.ClassName),5)
 		
@@ -983,8 +994,8 @@ class AbstractNode():
 		packet = self.BasicProtocol.SetAdditional(packet, additional)
 
 		if payload["tagging"]["cat_1"] == "service":
-			self.Services[payload["type"]]["uuid"] 		= ""
-			self.Services[payload["type"]]["enabled"] 	= 0
+			self.Services[payload["type"]]["uuid"]		= ""
+			self.Services[payload["type"]]["enabled"]	= 0
 	
 	def CloseLocalSocketRequestHandler(self, sock, packet):
 		payload	= self.BasicProtocol.GetPayloadFromJson(packet)
@@ -1026,8 +1037,8 @@ class AbstractNode():
 		self.SendRequest(uuid, "DIRECT", command, payload, {})
 
 	''' 
-		Description: 	N/A
-		Return: 		N/A
+		Description:	N/A
+		Return:			N/A
 	'''	
 	def UnRegisterOnNodeChangeEvent(self, uuid):
 		self.LogMSG("({classname})# [UnRegisterOnNodeChangeEvent] {0}".format(uuid,classname=self.ClassName),5)
@@ -1037,8 +1048,8 @@ class AbstractNode():
 		})
 
 	''' 
-		Description: 	Register change event on othr node from this node
-		Return: 		N/A
+		Description:	Register change event on othr node from this node
+		Return:			N/A
 	'''	
 	def RegisterOnNodeChangeEvent(self, uuid):
 		self.LogMSG("({classname})# [RegisterOnNodeChangeEvent] {0}".format(uuid,classname=self.ClassName),5)
@@ -1048,8 +1059,8 @@ class AbstractNode():
 		})
 	
 	''' 
-		Description: 	N/A
-		Return: 		N/A
+		Description:	N/A
+		Return:			N/A
 	'''	
 	def RegisterItem(self, payload):
 		self.DeviceChangeListLock.acquire()
@@ -1067,7 +1078,7 @@ class AbstractNode():
 			self.OnDeviceChangeList.append({
 				'ts':		time.time(),
 				'payload':	payload,
-				'type': 	payload["item_type"],
+				'type':		payload["item_type"],
 				'key':		key
 			})
 		except Exception as e:
@@ -1076,8 +1087,8 @@ class AbstractNode():
 		return True
 
 	''' 
-		Description: 	N/A
-		Return: 		N/A
+		Description:	N/A
+		Return:			N/A
 	'''		
 	def UnregisterItem(self, payload):
 		self.DeviceChangeListLock.acquire()
@@ -1100,13 +1111,13 @@ class AbstractNode():
 		return False
 
 	''' 
-		Description: 	N/A
-		Return: 		N/A
+		Description:	N/A
+		Return:			N/A
 	'''		
 	def RegisterOnNodeChangeRequestHandler(self, sock, packet):
 		self.LogMSG("({classname})# [RegisterOnNodeChangeRequestHandler]".format(classname=self.ClassName),5)
-		payload 	= self.BasicProtocol.GetPayloadFromJson(packet)
-		item_type 	= payload["item_type"]
+		payload		= self.BasicProtocol.GetPayloadFromJson(packet)
+		item_type	= payload["item_type"]
 
 		# Webface
 		if item_type in [2,3]:
@@ -1129,13 +1140,13 @@ class AbstractNode():
 			}
 
 	''' 
-		Description: 	N/A
-		Return: 		N/A
+		Description:	N/A
+		Return:			N/A
 	'''		
 	def UnregisterOnNodeChangeRequestHandler(self, sock, packet):
 		self.LogMSG("({classname})# [UnregisterOnNodeChangeRequestHandler] {0}".format(packet,classname=self.ClassName),5)
-		payload 	= self.BasicProtocol.GetPayloadFromJson(packet)
-		item_type 	= payload["item_type"]
+		payload		= self.BasicProtocol.GetPayloadFromJson(packet)
+		item_type	= payload["item_type"]
 
 		# Webface
 		if item_type in [2,3]:
@@ -1166,11 +1177,11 @@ class AbstractNode():
 		else:
 			machine_type = payload["machine_type"]
 
-		tag_id  = payload["id"]
-		src     = payload["src"]
-		tag     = payload["tag"]
+		tag_id	= payload["id"]
+		src		= payload["src"]
+		tag		= payload["tag"]
 		ui_type = payload["ui_type"]
-		path 	= os.path.join(".","ui",machine_type,self.UITypes[ui_type],src)
+		path	= os.path.join(".","ui",machine_type,self.UITypes[ui_type],src)
 		self.LogMSG("({classname})# [GetResourceRequestHandler] {0}".format(path, classname=self.ClassName),6)
 		byte_content = objFile.LoadBytes(path)
 		content = ""
@@ -1186,17 +1197,17 @@ class AbstractNode():
 		}
 
 	''' 
-		Description: 	Get file handler [REQUEST]
-		Return: 		N/A
+		Description:	Get file handler [REQUEST]
+		Return:			N/A
 	'''	
 	def GetFileRequestHandler(self, sock, packet):
-		objFile 		= MkSFile.File()
-		payload 		= self.BasicProtocol.GetPayloadFromJson(packet)
-		uiType 			= payload["ui_type"] # Base UI type
-		fileType 		= payload["file_type"]
-		fileName 		= payload["file_name"]
-		client_type 	= packet["additional"]["client_type"]
-		stamping 		= packet["stamping"]
+		objFile			= MkSFile.File()
+		payload			= self.BasicProtocol.GetPayloadFromJson(packet)
+		uiType			= payload["ui_type"] # Base UI type
+		fileType		= payload["file_type"]
+		fileName		= payload["file_name"]
+		client_type		= packet["additional"]["client_type"]
+		stamping		= packet["stamping"]
 		# TODO - Node should get type of machine the node ui running on.
 		
 		if "machine_type" not in payload:
@@ -1204,7 +1215,7 @@ class AbstractNode():
 		else:
 			machine_type = payload["machine_type"]
 
-		path 	= os.path.join(".","ui",machine_type,self.UITypes[uiType],"ui." + fileType)
+		path	= os.path.join(".","ui",machine_type,self.UITypes[uiType],"ui." + fileType)
 		content = objFile.Load(path)
 		
 		if ("html" in fileType):
@@ -1230,9 +1241,9 @@ class AbstractNode():
 			content = content.replace("[RESOURCES]", resources)
 			
 			config = '''
-				var GatewayIP 	= "[GATEWAY_IP]";
-				var NodeUUID  	= "[NODE_UUID]";
-				var LocalWSIP 	= "[LOCAL_WS_IP]";
+				var GatewayIP	= "[GATEWAY_IP]";
+				var NodeUUID	= "[NODE_UUID]";
+				var LocalWSIP	= "[LOCAL_WS_IP]";
 				var LocalWSPORT = [LOCAL_WS_PORT];
 			'''
 			
@@ -1255,8 +1266,8 @@ class AbstractNode():
 
 			content = content.replace("[CONFIGURATION]", config)
 			
-			css 	= ""
-			script 	= ""
+			css		= ""
+			script	= ""
 			if client_type == "global_ws":
 				script = '''					
 					<script src="mksdk-js/MkSAPI.js"></script>
@@ -1288,15 +1299,15 @@ class AbstractNode():
 		}
 
 	''' 
-		Description: 	N/A
-		Return: 		N/A
+		Description:	N/A
+		Return:			N/A
 	'''	
 	def LoadSystemConfig(self):
 		print(os.environ['HOME'])
 		self.MKSPath = os.path.join(os.environ['HOME'],"mks")
 		# Information about the node located here.
-		strSystemJson 		= self.File.Load("system.json") # Located in node context
-		strMachineJson 		= self.File.Load(os.path.join(self.MKSPath,"config.json"))
+		strSystemJson		= self.File.Load("system.json") # Located in node context
+		strMachineJson		= self.File.Load(os.path.join(self.MKSPath,"config.json"))
 
 		if (strSystemJson is None or len(strSystemJson) == 0):
 			self.LogMSG("({classname})# ERROR - Cannot find system.json file.".format(classname=self.ClassName),2)
@@ -1309,10 +1320,10 @@ class AbstractNode():
 			return False
 		
 		try:
-			dataSystem 				= json.loads(strSystemJson)
-			dataConfig 				= json.loads(strMachineJson)
-			self.NodeInfo 			= dataSystem["node"]["info"]
-			self.ServiceDepened 	= dataSystem["node"]["service"]["depend"]
+			dataSystem				= json.loads(strSystemJson)
+			dataConfig				= json.loads(strMachineJson)
+			self.NodeInfo			= dataSystem["node"]["info"]
+			self.ServiceDepened		= dataSystem["node"]["service"]["depend"]
 			self.System				= dataSystem["node"]["system"]
 		
 			self.EnableLogs(str(self.NodeInfo["type"]))
@@ -1328,22 +1339,22 @@ class AbstractNode():
 				self.LogMSG("({classname})# ERROR - Local IP not found".format(classname=self.ClassName),3)
 
 			# Node connection to WS information
-			self.Key 				= dataConfig["network"]["key"]
+			self.Key				= dataConfig["network"]["key"]
 			self.GatewayIP			= dataConfig["network"]["gateway"]
-			self.ApiPort 			= dataConfig["network"]["apiport"]
-			self.WsPort 			= dataConfig["network"]["wsport"]
-			self.ApiUrl 			= "http://{gateway}:{api_port}".format(gateway=self.GatewayIP, api_port=self.ApiPort)
+			self.ApiPort			= dataConfig["network"]["apiport"]
+			self.WsPort				= dataConfig["network"]["wsport"]
+			self.ApiUrl				= "http://{gateway}:{api_port}".format(gateway=self.GatewayIP, api_port=self.ApiPort)
 			self.WsUrl				= "ws://{gateway}:{ws_port}".format(gateway=self.GatewayIP, ws_port=self.WsPort)
 			# Device information
-			self.Type 				= self.NodeInfo["type"]
-			self.OSType 			= self.NodeInfo["ostype"]
-			self.OSVersion 			= self.NodeInfo["osversion"]
-			self.BrandName 			= self.NodeInfo["brandname"]
-			self.Name 				= self.NodeInfo["name"]
-			self.Description 		= self.NodeInfo["description"]
+			self.Type				= self.NodeInfo["type"]
+			self.OSType				= self.NodeInfo["ostype"]
+			self.OSVersion			= self.NodeInfo["osversion"]
+			self.BrandName			= self.NodeInfo["brandname"]
+			self.Name				= self.NodeInfo["name"]
+			self.Description		= self.NodeInfo["description"]
 			# TODO - Why is that?
 			if (self.Type == 1):
-				self.BoardType 		= self.NodeInfo["boardType"]
+				self.BoardType		= self.NodeInfo["boardType"]
 			self.UserDefined		= dataSystem["user"]
 			# Device UUID MUST be read from HW device.
 			if "True" == self.NodeInfo["isHW"]:
@@ -1366,15 +1377,15 @@ class AbstractNode():
 		return True
 
 	''' 
-		Description: 	N/A
-		Return: 		N/A
+		Description:	N/A
+		Return:			N/A
 	'''		
 	def SetWebServiceStatus(self, is_enabled):
 		self.IsNodeWSServiceEnabled = is_enabled
 
 	''' 
-		Description: 	N/A
-		Return: 		N/A
+		Description:	N/A
+		Return:			N/A
 	'''	
 	def SetLocalServerStatus(self, is_enabled):
 		self.IsNodeLocalServerEnabled = is_enabled
@@ -1398,8 +1409,8 @@ class AbstractNode():
 			self.ServiceSearchTS = time.time()
 
 	''' 
-		Description: 	N/A
-		Return: 		N/A
+		Description:	N/A
+		Return:			N/A
 	'''	
 	def LogMSG(self, message, level):
 		if self.Logger is not None:
@@ -1408,8 +1419,8 @@ class AbstractNode():
 			print("({classname})# [NONE LOGGER] - {0}".format(message,classname=self.ClassName))
 
 	''' 
-		Description: 	N/A
-		Return: 		N/A
+		Description:	N/A
+		Return:			N/A
 	'''	
 	def LogException(self, message, e, level):
 		if self.Logger is not None:
@@ -1425,8 +1436,8 @@ class AbstractNode():
 				error=str(e)))
 	
 	''' 
-		Description: 	N/A
-		Return: 		N/A
+		Description:	N/A
+		Return:			N/A
 	'''	
 	def Run (self, callback):
 		# Will be called each half a second.
@@ -1475,24 +1486,24 @@ class AbstractNode():
 		# TODO - Let user know about closing app
 	
 	''' 
-		Description: 	N/A
-		Return: 		N/A
+		Description:	N/A
+		Return:			N/A
 	'''	
 	def Stop (self, reason):
 		self.LogMSG("({classname})# Stop Node ... ({0})".format(reason,classname=self.ClassName),5)
-		self.IsMainNodeRunnig 		= False
-		self.IsLocalSocketRunning 	= False
+		self.IsMainNodeRunnig		= False
+		self.IsLocalSocketRunning	= False
 
 	''' 
-		Description: 	N/A
-		Return: 		N/A
+		Description:	N/A
+		Return:			N/A
 	'''	
 	def Pause (self):
 		pass
 
 	''' 
-		Description: 	N/A
-		Return: 		N/A
+		Description:	N/A
+		Return:			N/A
 	'''	
 	def Exit (self, reason):
 		self.Stop(reason)

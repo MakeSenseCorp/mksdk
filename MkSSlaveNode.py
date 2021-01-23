@@ -10,7 +10,7 @@ else:
 import threading
 import socket
 
-from flask import Flask, render_template, jsonify, Response, request
+# from flask import Flask, render_template, jsonify, Response, request
 import logging
 
 from mksdk import MkSGlobals
@@ -117,7 +117,7 @@ class SlaveNode(MkSAbstractNode.AbstractNode):
 				message = self.BasicProtocol.BuildRequest("DIRECT", "MASTER", self.UUID, "get_node_info", {}, {})
 				packet  = self.BasicProtocol.AppendMagic(message)
 				if self.LocalMasterConnection is not None:
-					self.SocketServer.Send(self.LocalMasterConnection.Socket, packet)
+					self.SocketServer.Send(self.LocalMasterConnection.Socket, packet)           
 				self.MasterInformationTries += 1
 
 	''' 

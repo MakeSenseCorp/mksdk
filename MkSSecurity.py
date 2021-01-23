@@ -8,5 +8,7 @@ class Security():
 		pass
 	
 	def GetMD5Hash(self, content):
-		return hashlib.md5(content).hexdigest()
+		md5Obj = hashlib.md5(content.encode())
+		hash = md5Obj.hexdigest()
+		return hash
 		# For Python 3+ hashlib.md5("whatever your string is".encode('utf-8')).hexdigest()

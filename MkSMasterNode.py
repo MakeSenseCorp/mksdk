@@ -354,7 +354,7 @@ class MasterNode(MkSAbstractNode.AbstractNode):
 			message = self.BasicProtocol.StringifyPacket(packet)
 			message = self.BasicProtocol.AppendMagic(message)
 			# Send via server (multithreaded and safe)
-			conn.Socket.send(message)
+			conn.Socket.send(message.encode())
 		else:
 			self.LogMSG("({classname})# HandleInternalReqest NODE NOT FOUND".format(classname=self.ClassName),4)
 			# Need to look at other masters list.
@@ -510,7 +510,7 @@ class MasterNode(MkSAbstractNode.AbstractNode):
 				node = connections[key]
 				if 1 == node.Obj["is_slave"]:
 					# Send message
-					node.Socket.send(raw_data)
+					node.Socket.send(raw_data.encode())
 
 	''' 
 		Description: 	This handler handle packets arrvived to/from nodes/gateway.

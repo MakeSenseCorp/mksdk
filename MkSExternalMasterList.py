@@ -16,10 +16,10 @@ import threading
 
 class ExternalMasterList:
 	def __init__(self, node):
-		self.ClassName  = "ExternalMasterList"
-		self.Context    = node
-		self.Masters    = {}
-		self.Working    = False
+		self.ClassName	= "ExternalMasterList"
+		self.Context	= node
+		self.Masters	= {}
+		self.Working	= False
 		self.Context.NodeRequestHandlers['get_master_nodes']  = self.OnGetMasterNodesRequestHandler
 		self.Context.NodeResponseHandlers['get_master_nodes'] = self.OnGetMasterNodesResponseHandler
 
@@ -43,8 +43,8 @@ class ExternalMasterList:
 		payload = self.Context.BasicProtocol.GetPayloadFromJson(packet)
 		master = self.Masters[payload["ip"]]
 		master["nodes"] = payload["nodes"]
-		master["ts"] 	= time.time()
-		master["uuid"] 	= payload["uuid"]
+		master["ts"]	= time.time()
+		master["uuid"]	= payload["uuid"]
 		self.Masters[payload["ip"]] = master
 
 	def ConnectMasterWithRetries(self, ip):
@@ -63,7 +63,7 @@ class ExternalMasterList:
 			master["ts"] = time.time()
 			if master["conn"] is not None:
 				message = self.Context.BasicProtocol.BuildRequest("DIRECT", "MASTER", self.Context.UUID, "get_master_nodes", {}, {})
-				packet  = self.Context.BasicProtocol.AppendMagic(message)
+				packet	= self.Context.BasicProtocol.AppendMagic(message)
 				self.Context.SocketServer.Send(master["conn"].Socket, packet)
 			self.Context.LogMSG("({classname})# SendGetNodesList [{0}, {1}] <get_master_nodes>".format(master["ip"],master["ts"],classname=self.ClassName),5)
 
@@ -80,8 +80,8 @@ class ExternalMasterList:
 							# Check if this socket already exist !!!!!!!
 							conn, status = self.ConnectMasterWithRetries(master["ip"])
 							if status is True:
-								master["conn"] 	 = conn
-								master["ts"] 	 = time.time() - 70
+								master["conn"]	 = conn
+								master["ts"]	 = time.time() - 70
 								master["status"] = True
 								# Get nodes list
 								self.SendGetNodesList(master)
@@ -100,36 +100,43 @@ class ExternalMasterList:
 			return
 		
 		master["status"] = False
-		master["nodes"]  = []
+		master["nodes"]	 = []
 		self.Masters[master["ip"]] = master
 		self.Context.LogMSG("({classname})# Append {0}".format(master,classname=self.ClassName),5)
 
 	def Remove(self, conn):
 		self.Context.LogMSG("({classname})# Remove {0}".format(conn.Obj["uuid"], classname=self.ClassName),5)
 		del_key = None
-		for key in self.Masters:
-			master = self.Masters[key]
-			if master["status"] is True:
-				if master["uuid"] == conn.Obj["uuid"]:
-					del_key = key
-		del self.Masters[del_key]
+		if len(self.Masters) > 0:
+			for key in self.Masters:
+				master = self.Masters[key]
+				if master["status"] is True:
+					if master["uuid"] == conn.Obj["uuid"]:
+						del_key = key
+		if del_key is not None:
+			del self.Masters[del_key]
 
 	def GetMasterConnection(self, uuid):
-		for key in self.Masters:
-			master = self.Masters[key]
-			if master["status"] is True:
-				if uuid in master["nodes"]:
-					return master["conn"]
+		if len(self.Masters) > 0:
+			for key in self.Masters:
+				master = self.Masters[key]
+				if master["status"] is True:
+					if uuid in master["nodes"]:
+						return master["conn"]
 		return None
 	
 	def GetMasterConnectionList(self):
+		if len(self.Masters) == 0:
+			return None
+		
 		return [self.Masters[key]["conn"] for key in self.Masters]
 	
 	def SendMessageAllMasters(self, packet):
-		for key in self.Masters:
-			master = self.Masters[key]
-			if master["status"] is True:
-				self.Context.SocketServer.Send(master["conn"].Socket, packet)
+		if len(self.Masters) > 0:
+			for key in self.Masters:
+				master = self.Masters[key]
+				if master["status"] is True:
+					self.Context.SocketServer.Send(master["conn"].Socket, packet)
 
 	def Start(self):
 		self.Context.LogMSG("({classname})# Start".format(classname=self.ClassName),5)
