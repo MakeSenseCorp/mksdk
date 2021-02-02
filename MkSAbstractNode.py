@@ -1203,100 +1203,110 @@ class AbstractNode():
 	def GetFileRequestHandler(self, sock, packet):
 		objFile			= MkSFile.File()
 		payload			= self.BasicProtocol.GetPayloadFromJson(packet)
-		uiType			= payload["ui_type"] # Base UI type
-		fileType		= payload["file_type"]
-		fileName		= payload["file_name"]
-		client_type		= packet["additional"]["client_type"]
-		stamping		= packet["stamping"]
 		# TODO - Node should get type of machine the node ui running on.
-		
+
 		if "machine_type" not in payload:
 			machine_type = "pc"
 		else:
 			machine_type = payload["machine_type"]
 
-		path	= os.path.join(".","ui",machine_type,self.UITypes[uiType],"ui." + fileType)
-		content = objFile.Load(path)
-		
-		if ("html" in fileType):
-			# Create resource section (load script, img,... via mks API)
-			resources = ""
-			html_rows = content.split("\n")
-			for row in html_rows:
-				if 'data-obj="mks"' in row:
-					xml = "<root>{0}</root>\n".format(row[:])
-					DOM = ET.fromstring(xml)
-					for element in DOM.iter():
-						if element.get('data-obj') is not None:
-							if element.get('data-obj') == "mks":
-								if element.tag == "script":
-									resources += "node.API.SendCustomCommand(NodeUUID, 'get_resource', { 'id':'', 'tag':'" + element.tag + "', 'src':'" + element.get('src') + "', 'ui_type': '" + uiType + "' }, function(res) { var payload = res.data.payload; MkSGlobal.ExecuteJS(MkSGlobal.ConvertHEXtoString(payload.content)); });"
-								elif element.tag == "css":
-									resources += "node.API.SendCustomCommand(NodeUUID, 'get_resource', { 'id':'', 'tag':'" + element.tag + "', 'src':'" + element.get('src') + "', 'ui_type': '" + uiType + "' }, function(res) { var payload = res.data.payload; MkSGlobal.AppendCSS(MkSGlobal.ConvertHEXtoString(payload.content)); });"
-								elif element.tag == "img":
-									tag_id = element.get('id')
-									resources += "node.API.SendCustomCommand(NodeUUID, 'get_resource', { 'id':'" + tag_id + "', 'tag':'" + element.tag + "', 'src':'" + element.get('src') + "', 'ui_type': '" + uiType + "' }, function(res) { var payload = res.data.payload; document.getElementById(payload.id).src = MkSGlobal.ConvertHEXtoString(payload.content); });"
-			
-			# Append resource section
-			content = content.replace("[RESOURCES]", resources)
-			
-			config = '''
-				var GatewayIP	= "[GATEWAY_IP]";
-				var NodeUUID	= "[NODE_UUID]";
-				var LocalWSIP	= "[LOCAL_WS_IP]";
-				var LocalWSPORT = [LOCAL_WS_PORT];
-			'''
-			
-			# Replace UUID
-			config = config.replace("[NODE_UUID]", self.UUID)
-			if stamping is None:
-				self.LogMSG("({classname})# [ERROR] Missing STAMPING in packet ...".format(classname=self.ClassName),3)
-				config = config.replace("[GATEWAY_IP]", self.GatewayIP)
-			else:
-				if "cloud_t" in stamping:
-					# TODO - Cloud URL must be in config.json
-					config = config.replace("[GATEWAY_IP]", "ec2-54-188-199-33.us-west-2.compute.amazonaws.com")
-				else:
-					config = config.replace("[GATEWAY_IP]", self.GatewayIP)
-			# Configure local websocket
-			config = config.replace("[LOCAL_WS_IP]", self.MyLocalIP)
-			config = config.replace("[LOCAL_WS_PORT]", str(WSManager.Port))
+		if "file_path" in payload:
+			path	= os.path.join(".","ui",machine_type,"app","resource",payload["file_path"])
+			content = objFile.Load(path)
+			# On CLIENT side - MkSGlobal.ConvertHEXtoString(payload.content));
+			return {
+				'file_path': payload["file_path"],
+				'content': content.encode("utf-8").hex()
+			}
+		else:
+			uiType			= payload["ui_type"] # Base UI type
+			fileType		= payload["file_type"]
+			fileName		= payload["file_name"]
+			client_type		= packet["additional"]["client_type"]
+			stamping		= packet["stamping"]
 
-			self.LogMSG("({classname})# Config: {0}".format(config,classname=self.ClassName),5)
-
-			content = content.replace("[CONFIGURATION]", config)
+			path	= os.path.join(".","ui",machine_type,self.UITypes[uiType],"ui." + fileType)
+			content = objFile.Load(path)
 			
-			css		= ""
-			script	= ""
-			if client_type == "global_ws":
-				script = '''					
-					<script src="mksdk-js/MkSAPI.js"></script>
-					<script src="mksdk-js/MkSCommon.js"></script>
-					<script src="mksdk-js/MkSGateway.js"></script>
-					<script src="mksdk-js/MkSWebface.js"></script>
+			if ("html" in fileType):
+				# Create resource section (load script, img,... via mks API)
+				resources = ""
+				html_rows = content.split("\n")
+				for row in html_rows:
+					if 'data-obj="mks"' in row:
+						xml = "<root>{0}</root>\n".format(row[:])
+						DOM = ET.fromstring(xml)
+						for element in DOM.iter():
+							if element.get('data-obj') is not None:
+								if element.get('data-obj') == "mks":
+									if element.tag == "script":
+										resources += "node.API.SendCustomCommand(NodeUUID, 'get_resource', { 'id':'', 'tag':'" + element.tag + "', 'src':'" + element.get('src') + "', 'ui_type': '" + uiType + "' }, function(res) { var payload = res.data.payload; MkSGlobal.ExecuteJS(MkSGlobal.ConvertHEXtoString(payload.content)); });"
+									elif element.tag == "css":
+										resources += "node.API.SendCustomCommand(NodeUUID, 'get_resource', { 'id':'', 'tag':'" + element.tag + "', 'src':'" + element.get('src') + "', 'ui_type': '" + uiType + "' }, function(res) { var payload = res.data.payload; MkSGlobal.AppendCSS(MkSGlobal.ConvertHEXtoString(payload.content)); });"
+									elif element.tag == "img":
+										tag_id = element.get('id')
+										resources += "node.API.SendCustomCommand(NodeUUID, 'get_resource', { 'id':'" + tag_id + "', 'tag':'" + element.tag + "', 'src':'" + element.get('src') + "', 'ui_type': '" + uiType + "' }, function(res) { var payload = res.data.payload; document.getElementById(payload.id).src = MkSGlobal.ConvertHEXtoString(payload.content); });"
+				
+				# Append resource section
+				content = content.replace("[RESOURCES]", resources)
+				
+				config = '''
+					var GatewayIP	= "[GATEWAY_IP]";
+					var NodeUUID	= "[NODE_UUID]";
+					var LocalWSIP	= "[LOCAL_WS_IP]";
+					var LocalWSPORT = [LOCAL_WS_PORT];
 				'''
-			elif client_type == "local_ws":
-				pass
-			else:
-				pass
-		
-			content = content.replace("[CSS]",css)
-			content = content.replace("[SCRIPTS]",script)
+				
+				# Replace UUID
+				config = config.replace("[NODE_UUID]", self.UUID)
+				if stamping is None:
+					self.LogMSG("({classname})# [ERROR] Missing STAMPING in packet ...".format(classname=self.ClassName),3)
+					config = config.replace("[GATEWAY_IP]", self.GatewayIP)
+				else:
+					if "cloud_t" in stamping:
+						# TODO - Cloud URL must be in config.json
+						config = config.replace("[GATEWAY_IP]", "ec2-54-188-199-33.us-west-2.compute.amazonaws.com")
+					else:
+						config = config.replace("[GATEWAY_IP]", self.GatewayIP)
+				# Configure local websocket
+				config = config.replace("[LOCAL_WS_IP]", self.MyLocalIP)
+				config = config.replace("[LOCAL_WS_PORT]", str(WSManager.Port))
 
-		# TODO - Minify file content
-		content = content.replace("\t","")
-		self.LogMSG("({classname})# Requested file: {path} ({fileName}.{fileType}) ({length})".format(classname=self.ClassName,
-				path=path,
-				fileName=fileName,
-				fileType=fileType,
-				length=str(len(content))),5)
+				self.LogMSG("({classname})# Config: {0}".format(config,classname=self.ClassName),5)
+
+				content = content.replace("[CONFIGURATION]", config)
+				
+				css		= ""
+				script	= ""
+				if client_type == "global_ws":
+					script = '''					
+						<script src="mksdk-js/MkSAPI.js"></script>
+						<script src="mksdk-js/MkSCommon.js"></script>
+						<script src="mksdk-js/MkSGateway.js"></script>
+						<script src="mksdk-js/MkSWebface.js"></script>
+					'''
+				elif client_type == "local_ws":
+					pass
+				else:
+					pass
+			
+				content = content.replace("[CSS]",css)
+				content = content.replace("[SCRIPTS]",script)
+
+			# TODO - Minify file content
+			content = content.replace("\t","")
+			self.LogMSG("({classname})# Requested file: {path} ({fileName}.{fileType}) ({length})".format(classname=self.ClassName,
+					path=path,
+					fileName=fileName,
+					fileType=fileType,
+					length=str(len(content))),5)
 		
-		# 'content': content.encode('hex')
-		return {
-			'file_type': fileType,
-			'ui_type': uiType,
-			'content': content.encode("utf-8").hex()
-		}
+			# 'content': content.encode('hex')
+			return {
+				'file_type': fileType,
+				'ui_type': uiType,
+				'content': content.encode("utf-8").hex()
+			}
 
 	''' 
 		Description:	N/A
