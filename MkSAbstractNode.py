@@ -657,14 +657,11 @@ class AbstractNode():
 		try:
 			data = bytes.decode()
 			# Each makesense packet should start from magic number "MKS"
-			self.LogMSG("({classname})# [DataSocketInputHandler] DEBUG #1".format(classname=self.ClassName),5)
 			self.LogMSG("({classname})# [DataSocketInputHandler] {0}".format(data, classname=self.ClassName),5)
 			if "MKSS" in data[:4]:
 				# One packet can hold multiple MKS messages.
-				self.LogMSG("({classname})# [DataSocketInputHandler] DEBUG #2".format(classname=self.ClassName),5)
 				multiData = data.split("MKSS:")
 				for fragment in multiData[1:]:
-					self.LogMSG("({classname})# [DataSocketInputHandler] DEBUG #3".format(classname=self.ClassName),5)
 					if "MKSE" in fragment:
 						# Handling MKS packet
 						raw_data	= fragment[:-5]
@@ -736,12 +733,10 @@ class AbstractNode():
 	def NodeDisconnectedHandler(self, connection):
 		# Remove from registration list
 		# self.RemoveDeviceChangeListNode(connection.Obj["uuid"])
-		self.LogMSG("({classname})# [NodeDisconnectedHandler] DEBUG #1".format(classname=self.ClassName),5)
 		self.UnregisterItem({
 			'item_type': 1,
 			'uuid':	connection.Obj["uuid"]
 		})
-		self.LogMSG("({classname})# [NodeDisconnectedHandler] DEBUG #2".format(classname=self.ClassName),5)
 		# Raise event for user
 		try:
 			if self.OnTerminateConnectionCallback is not None:

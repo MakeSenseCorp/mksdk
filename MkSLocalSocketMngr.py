@@ -295,11 +295,8 @@ class Manager():
 				return False
 			try:
 				# Raise event for user
-				self.LogMSG("({classname})# [RemoveConnectionByHASH] DEBUG #1".format(classname=self.ClassName),5)
 				if self.ConnectionRemovedEvent is not None:
-					self.LogMSG("({classname})# [RemoveConnectionByHASH] DEBUG #2".format(classname=self.ClassName),5)
 					self.ConnectionRemovedEvent(conn)
-					self.LogMSG("({classname})# [RemoveConnectionByHASH] DEBUG #3".format(classname=self.ClassName),5)
 			except Exception as e:
 				self.LogException("[ConnectionRemovedEvent]",e,3)
 			
