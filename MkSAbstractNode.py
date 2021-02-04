@@ -657,7 +657,7 @@ class AbstractNode():
 		try:
 			data = bytes.decode()
 			# Each makesense packet should start from magic number "MKS"
-			self.LogMSG("({classname})# [DataSocketInputHandler] {0}".format(data, classname=self.ClassName),5)
+			# self.LogMSG("({classname})# [DataSocketInputHandler] {0}".format(data, classname=self.ClassName),5)
 			if "MKSS" in data[:4]:
 				# One packet can hold multiple MKS messages.
 				multiData = data.split("MKSS:")
