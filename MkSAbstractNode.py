@@ -1167,16 +1167,16 @@ class AbstractNode():
 		objFile = MkSFile.File()
 		payload = self.BasicProtocol.GetPayloadFromJson(packet)
 		
-		if "machine_type" not in payload:
-			machine_type = "pc"
-		else:
-			machine_type = payload["machine_type"]
+		#if "machine_type" not in payload:
+		#	machine_type = "pc"
+		#else:
+		#	machine_type = payload["machine_type"]
 
 		tag_id	= payload["id"]
 		src		= payload["src"]
 		tag		= payload["tag"]
 		ui_type = payload["ui_type"]
-		path	= os.path.join(".","ui",machine_type,self.UITypes[ui_type],src)
+		path	= os.path.join(".","ui","app",src)
 		self.LogMSG("({classname})# [GetResourceRequestHandler] {0}".format(path, classname=self.ClassName),6)
 		byte_content = objFile.LoadBytes(path)
 		content = ""
@@ -1200,13 +1200,13 @@ class AbstractNode():
 		payload			= self.BasicProtocol.GetPayloadFromJson(packet)
 		# TODO - Node should get type of machine the node ui running on.
 
-		if "machine_type" not in payload:
-			machine_type = "pc"
-		else:
-			machine_type = payload["machine_type"]
+		#if "machine_type" not in payload:
+		#	machine_type = "pc"
+		#else:
+		#	machine_type = payload["machine_type"]
 
 		if "file_path" in payload:
-			path	= os.path.join(".","ui",machine_type,"app","resource",payload["file_path"])
+			path	= os.path.join(".","ui","app","resource",payload["file_path"])
 			content = objFile.Load(path)
 			# On CLIENT side - MkSGlobal.ConvertHEXtoString(payload.content));
 			return {
@@ -1220,7 +1220,7 @@ class AbstractNode():
 			client_type		= packet["additional"]["client_type"]
 			stamping		= packet["stamping"]
 
-			path	= os.path.join(".","ui",machine_type,self.UITypes[uiType],"ui." + fileType)
+			path	= os.path.join(".","ui","app","ui." + fileType)
 			content = objFile.Load(path)
 			
 			if ("html" in fileType):
