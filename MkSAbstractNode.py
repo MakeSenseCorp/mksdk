@@ -1225,9 +1225,20 @@ class AbstractNode():
 			
 			if ("html" in fileType):
 				# Create resource section (load script, img,... via mks API)
-				resources = ""
+				resources 	= ""
+				requires 	= ""
 				html_rows = content.split("\n")
-				for row in html_rows:
+				content = ""
+				for idx, row in enumerate(html_rows):
+					append_row = True
+					if 'require ' in row:
+						try:
+							index = row.index("require")
+							splited = row[index:].split(" ")
+							requires += "node.API.LoadModule('{0}.js');".format(splited[1])
+							append_row = False
+						except Exception as e:
+							self.LogException("Failed to import module {0}".format(row),e,5) 
 					if 'data-obj="mks"' in row:
 						xml = "<root>{0}</root>\n".format(row[:])
 						DOM = ET.fromstring(xml)
@@ -1241,9 +1252,12 @@ class AbstractNode():
 									elif element.tag == "img":
 										tag_id = element.get('id')
 										resources += "node.API.SendCustomCommand(NodeUUID, 'get_resource', { 'id':'" + tag_id + "', 'tag':'" + element.tag + "', 'src':'" + element.get('src') + "', 'ui_type': '" + uiType + "' }, function(res) { var payload = res.data.payload; document.getElementById(payload.id).src = MkSGlobal.ConvertHEXtoString(payload.content); });"
-				
+					if append_row is True:
+						content += row + "\n"
+
 				# Append resource section
 				content = content.replace("[RESOURCES]", resources)
+				content = content.replace("[MODULES]", requires)
 				
 				config = '''
 					var GatewayIP	= "[GATEWAY_IP]";
