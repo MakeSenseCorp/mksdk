@@ -1225,8 +1225,67 @@ class AbstractNode():
 			
 			if ("html" in fileType):
 				# Create resource section (load script, img,... via mks API)
+				node_client_api = '''
+					function Node() {
+						var self = this;
+						// Get makesense api instanse.
+						this.API 		= MkSAPIBuilder.GetInstance();
+						// Update gateway IP address
+						this.API.SetGlobalGatewayIP(GatewayIP);
+						this.API.SetLocalWebsockIP(LocalWSIP);
+						this.API.SetLocalWebsockPort(LocalWSPORT);
+						this.API.SetNodeUUID(NodeUUID);
+						// Default handler
+						this.API.OnUnexpectedDataArrived = function (packet) {
+							console.log(packet);
+						}
+						this.API.ModulesLoadedCallback = function () {
+							self.NodeLoaded();
+						}
+						return this;
+					}
+					Node.prototype.Connect = function() {
+						var self = this;
+						console.log("Connect Gateway");
+						self.API.OnNodeChangeCallback = self.OnChangeEvent.bind(self);
+						this.API.ConnectGateway(function() {
+							console.log("Connection to Gateway was established.");
+							self.API.GetNodeInfo(NodeUUID, function(res) {
+								UserGetNodeSensorInfoHandler(res);
+							});
+						});
+					}
+					Node.prototype.NodeLoaded = function () {
+						UserNodeLoaded();
+					}
+					Node.prototype.Init = function() {
+						UserInit();
+					}
+					Node.prototype.PostInit = function() {
+						UserPostInit();
+					}
+					Node.prototype.OnChangeEvent = function(packet) {
+						UserEventRecieved(packet.data.payload.event, packet.data.payload.data);
+					}
+					var node = new Node(NodeUUID);
+					node.Init();
+					node.Connect();
+					var UserGetNodeSensorInfoHandler = function(res) {
+						var payload = res.data.payload;
+						[MODULES]
+						[RESOURCES]
+						node.API.ConnectLocalWS(NodeUUID, function(res) {
+							console.log("Connected to local websocket", res);
+						});
+						node.API.RegisterOnNodeChange(NodeUUID, function(res) {
+							console.log("UI have registered NODE successfuly", res);
+						});
+						node.PostInit();
+					}
+				'''
 				resources 	= ""
 				requires 	= ""
+				require_count = 0
 				html_rows = content.split("\n")
 				content = ""
 				for idx, row in enumerate(html_rows):
@@ -1236,6 +1295,7 @@ class AbstractNode():
 							index = row.index("require")
 							splited = row[index:].split(" ")
 							requires += "node.API.LoadModule('{0}.js');".format(splited[1])
+							require_count += 1
 							append_row = False
 						except Exception as e:
 							self.LogException("Failed to import module {0}".format(row),e,5) 
@@ -1256,8 +1316,9 @@ class AbstractNode():
 						content += row + "\n"
 
 				# Append resource section
+				content = content.replace("[NODE_INSTANCE]", node_client_api)
 				content = content.replace("[RESOURCES]", resources)
-				content = content.replace("[MODULES]", requires)
+				content = content.replace("[MODULES]", "window.MKSModulesCount = {0};\n{1}".format(require_count,requires))
 				
 				config = '''
 					var GatewayIP	= "[GATEWAY_IP]";
