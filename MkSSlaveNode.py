@@ -469,15 +469,14 @@ class SlaveNode(MkSAbstractNode.AbstractNode):
 						'identifier':-1
 					}
 
-			self.LogMSG("({classname})# {0}".format(item_type, classname=self.ClassName),5)
 			# Send to Node
 			if item_type == 1:
-				self.LogMSG("({classname})# [EmitOnNodeChange] NODE {0}".format(destination,classname=self.ClassName),5)
+				#self.LogMSG("({classname})# [EmitOnNodeChange] NODE {0}".format(destination,classname=self.ClassName),5)
 				self.SendReponse(destination, "DIRECT", "on_node_change", data, event_payload)
 			# Send via Master or Local Websocket
 			elif item_type == 2:
 				# Build message
-				self.LogMSG("({classname})# [EmitOnNodeChange] MASTER {0}".format(destination,classname=self.ClassName),5)
+				#self.LogMSG("({classname})# [EmitOnNodeChange] MASTER {0}".format(destination,classname=self.ClassName),5)
 				message = self.BasicProtocol.BuildRequest("DIRECT", destination, self.UUID, "on_node_change", data, event_payload)
 				if self.IsLocalSockInUse is True:
 					self.EmitEventViaLocalWebsocket(json.loads(message))

@@ -88,6 +88,7 @@ class BasicNetworkProtocol():
 		return self.BuildMessage("message", messageType, destination, source, command, payload, piggy)
     
 	def BuildResponse(self, packet, payload):
+		# TODO - Split into chunks if message bigger then 64K
 		dest 		= packet['header']['destination']
 		src 		= packet['header']['source']
 		msg_type 	= packet['header']['message_type']
