@@ -186,7 +186,6 @@ class Manager():
 					if sock is self.ServerSocket and self.IsListenerEnabled is True:
 						conn, addr = sock.accept()
 						#conn.setblocking(0)
-						self.LogMSG("({classname})# [LocalSocketWorker] NEW SOCKET".format(classname=self.ClassName),5)
 						self.Transceiver.Receive({
 							"type": "sock_new_connection",
 							"data": {
@@ -204,7 +203,6 @@ class Manager():
 									data += chunk
 									dataLen = len(chunk)
 								if data:
-									self.LogMSG("({classname})# [LocalSocketWorker] MKS PACKET".format(classname=self.ClassName),5)
 									self.Transceiver.Receive({
 										"type": "sock_data_arrived", 
 										"data": {
@@ -213,7 +211,6 @@ class Manager():
 										}
 									})
 								else:
-									self.LogMSG("({classname})# [LocalSocketWorker] SOCKET CLOSED".format(classname=self.ClassName),5)
 									self.LogMSG("({classname})# [LocalSocketWorker] Socket closed ...".format(classname=self.ClassName),1)
 									# Remove socket from list.
 									self.RecievingSockets.remove(sock)
