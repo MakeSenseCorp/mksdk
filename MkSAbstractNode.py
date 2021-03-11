@@ -1184,6 +1184,7 @@ class AbstractNode():
 			#content = "data:image/jpeg;base64," + byte_content.encode('base64')
 			content = "data:image/jpeg;base64," + base64.b64encode(byte_content).decode('utf-8')
 		# 'content': content.encode('hex')
+		self.LogMSG("({classname})# [GetResourceRequestHandler] Content {0}".format(len(content), classname=self.ClassName),6)
 		return {
 			'id': tag_id,
 			'tag': tag,
@@ -1294,7 +1295,7 @@ class AbstractNode():
 						try:
 							index = row.index("require")
 							splited = row[index:].split(" ")
-							requires += "node.API.LoadModule('{0}.js');".format(splited[1])
+							requires += "node.API.LoadModule('{0}.js');\n".format(splited[1])
 							require_count += 1
 							append_row = False
 						except Exception as e:
@@ -1306,12 +1307,12 @@ class AbstractNode():
 							if element.get('data-obj') is not None:
 								if element.get('data-obj') == "mks":
 									if element.tag == "script":
-										resources += "node.API.SendCustomCommand(NodeUUID, 'get_resource', { 'id':'', 'tag':'" + element.tag + "', 'src':'" + element.get('src') + "', 'ui_type': '" + uiType + "' }, function(res) { var payload = res.data.payload; MkSGlobal.ExecuteJS(MkSGlobal.ConvertHEXtoString(payload.content)); });"
+										resources += "node.API.SendCustomCommand(NodeUUID, 'get_resource', { 'id':'', 'tag':'" + element.tag + "', 'src':'" + element.get('src') + "', 'ui_type': '" + uiType + "' }, function(res) { var payload = res.data.payload; MkSGlobal.ExecuteJS(MkSGlobal.ConvertHEXtoString(payload.content)); });\n"
 									elif element.tag == "css":
-										resources += "node.API.SendCustomCommand(NodeUUID, 'get_resource', { 'id':'', 'tag':'" + element.tag + "', 'src':'" + element.get('src') + "', 'ui_type': '" + uiType + "' }, function(res) { var payload = res.data.payload; MkSGlobal.AppendCSS(MkSGlobal.ConvertHEXtoString(payload.content)); });"
+										resources += "node.API.SendCustomCommand(NodeUUID, 'get_resource', { 'id':'', 'tag':'" + element.tag + "', 'src':'" + element.get('src') + "', 'ui_type': '" + uiType + "' }, function(res) { var payload = res.data.payload; MkSGlobal.AppendCSS(MkSGlobal.ConvertHEXtoString(payload.content)); });\n"
 									elif element.tag == "img":
 										tag_id = element.get('id')
-										resources += "node.API.SendCustomCommand(NodeUUID, 'get_resource', { 'id':'" + tag_id + "', 'tag':'" + element.tag + "', 'src':'" + element.get('src') + "', 'ui_type': '" + uiType + "' }, function(res) { var payload = res.data.payload; document.getElementById(payload.id).src = MkSGlobal.ConvertHEXtoString(payload.content); });"
+										resources += "node.API.SendCustomCommand(NodeUUID, 'get_resource', { 'id':'" + tag_id + "', 'tag':'" + element.tag + "', 'src':'" + element.get('src') + "', 'ui_type': '" + uiType + "' }, function(res) { var payload = res.data.payload; console.log(payload); document.getElementById(payload.id).src = MkSGlobal.ConvertHEXtoString(payload.content); });\n"
 					if append_row is True:
 						content += row + "\n"
 
