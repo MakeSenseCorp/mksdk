@@ -1312,7 +1312,7 @@ class AbstractNode():
 										resources += "node.API.SendCustomCommand(NodeUUID, 'get_resource', { 'id':'', 'tag':'" + element.tag + "', 'src':'" + element.get('src') + "', 'ui_type': '" + uiType + "' }, function(res) { var payload = res.data.payload; MkSGlobal.AppendCSS(MkSGlobal.ConvertHEXtoString(payload.content)); });\n"
 									elif element.tag == "img":
 										tag_id = element.get('id')
-										resources += "node.API.SendCustomCommand(NodeUUID, 'get_resource', { 'id':'" + tag_id + "', 'tag':'" + element.tag + "', 'src':'" + element.get('src') + "', 'ui_type': '" + uiType + "' }, function(res) { var payload = res.data.payload; console.log(payload); document.getElementById(payload.id).src = MkSGlobal.ConvertHEXtoString(payload.content); });\n"
+										resources += "node.API.SendCustomCommand(NodeUUID, 'get_resource', { 'id':'" + tag_id + "', 'tag':'" + element.tag + "', 'src':'" + element.get('src') + "', 'ui_type': '" + uiType + "' }, function(res) { var payload = res.data.payload; document.getElementById(payload.id).src = MkSGlobal.ConvertHEXtoString(payload.content); });\n"
 					if append_row is True:
 						content += row + "\n"
 
