@@ -62,7 +62,8 @@ class BasicNetworkProtocol():
 			'data': {
 				'header': { 
 					'command': str(command), 
-					'timestamp': str(int(time.time())) 
+					'timestamp': str(int(time.time())),
+					'segments': { }
 				},
 				'payload': payload
 			},
@@ -99,9 +100,10 @@ class BasicNetworkProtocol():
 		else:
 			packet['header']['source'] = dest
 
-		packet['header']['destination']	= src
-		packet['header']['direction']	= "response"
-		packet['data']['payload']		= payload
+		packet['header']['destination']			= src
+		packet['header']['direction']			= "response"
+		packet['data']['header']['segments']	= {}
+		packet['data']['payload']				= payload
 
 		return json.dumps(packet)
 	

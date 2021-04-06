@@ -401,7 +401,7 @@ class SlaveNode(MkSAbstractNode.AbstractNode):
 		Description: 	Override method to send request
 		Return: 		N/A
 	'''	
-	def SendReponse(self, uuid, msg_type, command, payload, additional):
+	def SendResponse(self, uuid, msg_type, command, payload, additional):
 		# Generate request
 		message = self.BasicProtocol.CreateResponse(msg_type, uuid, self.UUID, command, payload, additional)
 		packet  = self.BasicProtocol.AppendMagic(message)
@@ -430,7 +430,7 @@ class SlaveNode(MkSAbstractNode.AbstractNode):
 			if item_type == 1:
 				destination = payload["uuid"]
 				self.LogMSG("({classname})# [EmitOnNodeChangeByIndex] NODE {0}".format(destination,classname=self.ClassName),5)
-				self.SendReponse(destination, "DIRECT", "operations", {
+				self.SendResponse(destination, "DIRECT", "operations", {
 					"index": 	 index,
 					"subindex":	 0x100,
 					"direction": 0x1,
@@ -472,7 +472,7 @@ class SlaveNode(MkSAbstractNode.AbstractNode):
 			# Send to Node
 			if item_type == 1:
 				#self.LogMSG("({classname})# [EmitOnNodeChange] NODE {0}".format(destination,classname=self.ClassName),5)
-				self.SendReponse(destination, "DIRECT", "on_node_change", data, event_payload)
+				self.SendResponse(destination, "DIRECT", "on_node_change", data, event_payload)
 			# Send via Master or Local Websocket
 			elif item_type == 2:
 				# Build message

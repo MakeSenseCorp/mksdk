@@ -79,9 +79,39 @@ class MkSLocalWebsocketServer():
 		if self.OnDataArrivedEvent is not None:
 			self.OnDataArrivedEvent(ws, packet)
 	
+	# Generate packet segments
+	def GenerateSegmentsTX(self, packet):
+		segment_length = 50000
+		segments = []
+		# Get payload
+		payload = packet["data"]["payload"]
+		# Convert payload to stream
+		data = json.dumps(payload)
+		try:
+			data_length = len(data)
+			segments_count = data_length / segment_length
+
+			for idx in range(segments_count):
+				# Set segment payload
+				packet["data"]["payload"] = data[idx*segment_length:(idx+1)*segment_length]
+				packet["data"]["header"]["segments"]["count"] += 1
+				packet["data"]["header"]["segments"]["index"] += idx+1
+				segments.append(json.dumps(packet))
+			
+			if len(data[segments_count*segment_length:]) > 0:
+				packet["data"]["payload"] = data[segments_count*segment_length:]
+				packet["data"]["header"]["segments"]["count"] += 1
+				packet["data"]["header"]["segments"]["index"] += segments_count+1
+				segments.append(json.dumps(packet))
+		except Exception as e:
+			print ("({classname})# [ERROR] GenerateSegmentsTX {0}".format(str(e), classname=self.ClassName))
+			segments = []
+		return segments
+	
 	def Send(self, ws_id, data):
 		if ws_id in self.ApplicationSockets:
 			try:
+				# TODO - If data bigger then 50K we must split into segments
 				self.ApplicationSockets[ws_id].send(json.dumps(data))
 			except Exception as e:
 				print ("({classname})# [ERROR] Send {0}".format(str(e), classname=self.ClassName))
@@ -90,7 +120,11 @@ class MkSLocalWebsocketServer():
 	
 	def EmitEvent(self, data):
 		for key in self.ApplicationSockets:
-			self.ApplicationSockets[key].send(json.dumps(data))
+			# TODO - If data bigger then 50K we must split into segments
+			try:
+				self.ApplicationSockets[key].send(json.dumps(data))
+			except Exception as e:
+				print ("({classname})# [ERROR] EmitEvent {0}".format(str(e), classname=self.ClassName))
 	
 	def IsServerRunnig(self):
 		return self.ServerRunning
@@ -467,6 +501,7 @@ class AbstractNode():
 		self.LogMSG("({classname})# [LocalWebsockConnectedHandler] {0}".format(ws_id,classname=self.ClassName),5)
 		self.IsLocalSockInUse = True
 
+	# RX Websocket Handler
 	def LocalWebsockDataArrivedHandler(self, ws, packet):
 		messageType = self.BasicProtocol.GetMessageTypeFromJson(packet)
 		direction	= self.BasicProtocol.GetDirectionFromJson(packet)
